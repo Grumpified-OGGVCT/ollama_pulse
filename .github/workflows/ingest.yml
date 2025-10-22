@@ -37,14 +37,11 @@ jobs:
         
       - name: Mine insights
         run: python scripts/mine_insights.py
-        
-      - name: Generate report
-        run: python scripts/generate_report.py
-        
-      - name: Commit and push changes
+
+      - name: Commit and push data changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add data/ reports/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update Ollama Pulse data - $(date +'%Y-%m-%d %H:%M')" && git push)
+          git add data/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore(data): hourly ingestion $(date -u '+%Y-%m-%d %H:%M UTC')" && git push)
 
