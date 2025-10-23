@@ -1004,12 +1004,12 @@
   },
   {
     "title": "[PR] duckdb: 1.3.2 -> 1.4.1; python3Packages.duckdb: 1.3.2 -> 1.4.1; python3Packages.{sqlglot,narwhals,frictionless}: fixes",
-    "date": "2025-10-23T20:04:36Z",
+    "date": "2025-10-23T23:14:15Z",
     "summary": "Hey,\r\n\r\nI'm not really familiar on how to test packages in nixpkgs but I did this:\r\n```sh\r\n$ cd nixpkgs\r\n$ nix-build -A duckdb\r\n$ ./result/bin/duckdb -c \"\r\n    ATTACH 'ducklake:metadata.ducklake' AS my_ducklake;\r\n    USE my_ducklake;\r\n\r\n    INSTALL spatial; LOAD spatial;\r\n    LOAD httpfs;\r\n\r\n    CRE",
     "url": "https://github.com/NixOS/nixpkgs/pull/444225",
     "source": "github_prs",
     "highlights": [
-      "comments: 39",
+      "comments: 40",
       "pull request",
       "repo: nixpkgs"
     ]
@@ -1088,7 +1088,7 @@
   },
   {
     "title": "[PR] fix(deps): update dependency org.springframework.ai:spring-ai-bom to v1.0.3",
-    "date": "2025-10-23T03:48:58Z",
+    "date": "2025-10-23T22:35:26Z",
     "summary": "This PR contains the following updates:\n\n| Package | Change | Age | Confidence |\n|---|---|---|---|\n| [org.springframework.ai:spring-ai-bom](https://redirect.github.com/spring-projects/spring-ai) | `1.0.0` -> `1.0.3` | [![age](https://developer.mend.io/api/mc/badges/age/maven/org.springframework.ai:s",
     "url": "https://github.com/asm0dey/git-mcp-spring/pull/10",
     "source": "github_prs",
@@ -1736,7 +1736,7 @@
   },
   {
     "title": "[PR] Feature/coding agent 3",
-    "date": "2025-10-23T22:03:19Z",
+    "date": "2025-10-23T23:09:05Z",
     "summary": "## Description\r\nBrief summary of the changes and the issue this PR addresses.\r\n\r\nFixes # (issue number)\r\n\r\n## Type of Change\r\nPlease delete options that are not relevant:\r\n\r\n- [ ] Bug fix (non-breaking change which fixes an issue)\r\n- [ ] New feature (non-breaking change which adds functionality)\r\n- ",
     "url": "https://github.com/Codehagen/social-forge/pull/9",
     "source": "github_prs",
