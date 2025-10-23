@@ -43,6 +43,40 @@ def load_aggregated_data():
         return json.load(f)
 
 
+def generate_dynamic_queries(entries):
+    """
+    Generate dynamic search queries based on yesterday's patterns
+    This enables adaptive discovery of emerging trends
+    """
+    print("🔮 Generating dynamic queries from patterns...")
+    
+    # Count keyword frequencies
+    keyword_counts = {}
+    for entry in entries:
+        text = (entry.get('title', '') + ' ' + entry.get('summary', '')).lower()
+        
+        # Extract relevant keywords
+        keywords = ['voice', 'stt', 'tts', 'multimodal', 'vision', 
+                   'turbo', 'cloud', 'api', 'integration', 'agent',
+                   'rag', 'embedding', 'vector', 'search']
+        
+        for keyword in keywords:
+            if keyword in text:
+                keyword_counts[keyword] = keyword_counts.get(keyword, 0) + 1
+    
+    # Generate queries for top trending keywords
+    dynamic_queries = []
+    sorted_keywords = sorted(keyword_counts.items(), key=lambda x: x[1], reverse=True)
+    
+    for keyword, count in sorted_keywords[:5]:  # Top 5 trends
+        if count >= 3:  # Threshold for significance
+            query = f"ollama turbo {keyword} integrations site:github.com"
+            dynamic_queries.append(query)
+            print(f"  💡 Generated query: '{query}' (detected {count}x)")
+    
+    return dynamic_queries
+
+
 def detect_patterns_simple(entries):
     """Simple pattern detection using regex (fallback mode)"""
     print("🔍 Detecting patterns (simple mode)...")
@@ -52,7 +86,8 @@ def detect_patterns_simple(entries):
         "cloud_models": [],
         "no_code": [],
         "voice": [],
-        "coding": []
+        "coding": [],
+        "turbo_services": []
     }
     
     for entry in entries:
@@ -61,7 +96,7 @@ def detect_patterns_simple(entries):
         if re.search(r'(multimodal|vision|image|qwen3-vl)', text):
             patterns["multimodal"].append(entry)
         
-        if re.search(r'(-cloud|ollama cloud)', text):
+        if re.search(r'(-cloud|ollama cloud|turbo)', text):
             patterns["cloud_models"].append(entry)
         
         if re.search(r'(n8n|zapier|make|no-code)', text):
@@ -72,6 +107,9 @@ def detect_patterns_simple(entries):
         
         if re.search(r'(code|coding|coder|programming)', text):
             patterns["coding"].append(entry)
+        
+        if re.search(r'(turbo|service|api|proxy)', text):
+            patterns["turbo_services"].append(entry)
     
     # Filter patterns with at least 2 items
     significant_patterns = {k: v for k, v in patterns.items() if len(v) >= 2}
@@ -164,7 +202,7 @@ def infer_implications(patterns):
     return inferences
 
 
-def save_insights(patterns, inferences):
+def save_insights(patterns, inferences, dynamic_queries=None):
     """Save insights to JSON"""
     filename = get_today_filename()
     
@@ -172,6 +210,7 @@ def save_insights(patterns, inferences):
         "date": datetime.now().isoformat(),
         "patterns": {k: [{"title": e.get('title'), "url": e.get('url')} for e in v] for k, v in patterns.items()},
         "inferences": inferences,
+        "dynamic_queries": dynamic_queries or [],
         "stats": {
             "total_patterns": len(patterns),
             "total_inferences": len(inferences),
@@ -198,6 +237,9 @@ def main():
     
     print(f"📊 Mining {len(entries)} entries...")
     
+    # Generate dynamic queries for future searches
+    dynamic_queries = generate_dynamic_queries(entries)
+    
     # Detect patterns
     if EMBEDDINGS_AVAILABLE and len(entries) >= 10:
         patterns = detect_patterns_ml(entries)
@@ -208,7 +250,7 @@ def main():
     inferences = infer_implications(patterns)
     
     # Save
-    save_insights(patterns, inferences)
+    save_insights(patterns, inferences, dynamic_queries)
     
     print("✅ Insights mining complete!")
 
