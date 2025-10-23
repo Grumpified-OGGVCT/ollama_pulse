@@ -182,7 +182,7 @@ def generate_report_md(aggregated, insights):
 - **High-Purity Veins**: {len(high_turbo)} Turbo-focused items (score ≥0.7)
 - **Pattern Arteries**: {insights.get('stats', {}).get('total_patterns', 0)} detected
 - **Prophetic Insights**: {insights.get('stats', {}).get('total_inferences', 0)} inferences drawn
-- **Last Excavation**: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+- **Last Excavation**: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}
 
 ---
 
@@ -356,7 +356,7 @@ title: Ollama Pulse
   <div class="card">
     <h3>Latest Report: {today}</h3>
     <p>Check out today's Ollama ecosystem discoveries!</p>
-    <p class="meta">Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}</p>
+    <p class="meta">Generated: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}</p>
     <a href="reports/pulse-{today}.html">Read full report →</a>
   </div>
 </div>

@@ -118,11 +118,21 @@ def save_data(entries):
 
 def main():
     """Main ingestion function"""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Ollama Cloud Deep Ingestion')
+    parser.add_argument('--filter', default='turbo', choices=['turbo', 'all'],
+                       help='Filter models by type (default: turbo)')
+    parser.add_argument('--depth', default='full', choices=['full', 'basic'],
+                       help='Depth of information to fetch (default: full)')
+    
+    args = parser.parse_args()
+    
     print("🚀 Starting cloud sources deep ingestion...")
     ensure_data_dir()
     
-    # Fetch cloud models with Turbo focus
-    cloud_entries = fetch_ollama_tags(filter_type="turbo", depth="full")
+    # Fetch cloud models with specified filters
+    cloud_entries = fetch_ollama_tags(filter_type=args.filter, depth=args.depth)
     
     # Save
     save_data(cloud_entries)
