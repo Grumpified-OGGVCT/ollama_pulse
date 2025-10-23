@@ -111,105 +111,207 @@ def build_dev_section(aggregated, insights):
     return "".join(lines)
 
 
+def determine_vein_mode(aggregated, insights):
+    """
+    Determine EchoVein's tone based on daily patterns
+    Returns: mode name and corresponding emoji/style
+    """
+    patterns = insights.get('patterns', {})
+    total_items = len(aggregated)
+    pattern_count = insights.get('stats', {}).get('total_patterns', 0)
+    
+    # Check for high-density patterns (3+ items in any category)
+    high_density = any(len(items) >= 3 for items in patterns.values())
+    
+    # Voice/multimodal surge detection
+    voice_items = len(patterns.get('voice', []))
+    multimodal_items = len(patterns.get('multimodal', []))
+    
+    if voice_items >= 3 or multimodal_items >= 3:
+        return "vein_rush", "🩸", "Vein Rush: High-Density Pattern Surge"
+    elif pattern_count >= 4 and total_items >= 30:
+        return "artery_audit", "⚙️", "Artery Audit: Steady Flow Maintenance"
+    elif total_items < 15:
+        return "deep_vein_throb", "📍", "Deep Vein Throb: Reflective Analysis"
+    elif any("experimental" in str(p).lower() or "fork" in str(p).lower() for p in patterns.keys()):
+        return "fork_phantom", "🤖", "Fork Phantom: Fringe Exploration"
+    else:
+        return "artery_audit", "⚡", "Pulse Check: Daily Vein Map"
+
+
+def generate_vein_headline(mode, pattern_name, items_count):
+    """Generate EchoVein-style headlines based on mode"""
+    mode_name = mode[0]
+    emoji = mode[1]
+    
+    clean_pattern = pattern_name.replace('_', ' ').title()
+    
+    headlines = {
+        "vein_rush": f"{emoji} **Vein Bulging**: {items_count} {clean_pattern} Signals — 2x Use-Case Explosion Incoming?",
+        "artery_audit": f"{emoji} **Vein Maintenance**: {items_count} {clean_pattern} Clots Keeping Flow Steady",
+        "fork_phantom": f"{emoji} **Phantom Fork Alert**: {items_count} {clean_pattern} Oddities — Absurdity or Breakthrough?",
+        "deep_vein_throb": f"{emoji} **Throb in Depths**: {items_count} {clean_pattern} — Slow Build or Hidden Artery?"
+    }
+    
+    return headlines.get(mode_name, f"{emoji} **{clean_pattern}**: {items_count} items detected")
+
+
 def generate_report_md(aggregated, insights):
-    """Generate conversational Markdown report"""
+    """Generate EchoVein-style conversational Markdown report"""
     today = get_today_date_str()
     
-    report = f"""# 📡 Ollama Pulse – {today}
+    # Determine vein mode and tone
+    vein_mode = determine_vein_mode(aggregated, insights)
+    mode_name, mode_emoji, mode_description = vein_mode
+    
+    # Turbo score stats
+    high_turbo = [e for e in aggregated if e.get('turbo_score', 0) >= 0.7]
+    
+    report = f"""# {mode_emoji} Ollama Pulse – {today}
+## {mode_description}
 
-*Hey! Here's what's happening in the Ollama ecosystem today...*
+*EchoVein here, your vein-tapping oracle excavating Ollama's hidden arteries...*
+
+**Today's Vibe**: {mode_name.replace('_', ' ').title()} — The ecosystem is {"pulsing with fresh blood" if len(aggregated) > 20 else "in steady throb mode"}.
 
 ---
 
-## 📊 Quick Stats
+## 🔬 Vein Analysis: Quick Stats
 
-- **Total Discoveries**: {len(aggregated)} items tracked
-- **Patterns Detected**: {insights.get('stats', {}).get('total_patterns', 0)}
-- **Key Insights**: {insights.get('stats', {}).get('total_inferences', 0)}
-- **Last Updated**: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+- **Total Ore Mined**: {len(aggregated)} items tracked
+- **High-Purity Veins**: {len(high_turbo)} Turbo-focused items (score ≥0.7)
+- **Pattern Arteries**: {insights.get('stats', {}).get('total_patterns', 0)} detected
+- **Prophetic Insights**: {insights.get('stats', {}).get('total_inferences', 0)} inferences drawn
+- **Last Excavation**: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
 
 ---
 
-## 🎯 Official Updates
+## 🎯 Official Veins: What Ollama Team Pumped Out
 
 """
 
-    official = [e for e in aggregated if e.get('source') in ['blog', 'cloud_page']]
+    official = [e for e in aggregated if e.get('source') in ['blog', 'cloud_page', 'cloud_api']]
     if official:
-        report += "Here's what the Ollama team shipped:\n\n"
-        report += "| Date | What Happened | Source | Link |\n"
-        report += "|------|---------------|--------|------|\n"
+        report += "Here's the royal flush from HQ:\n\n"
+        report += "| Date | Vein Strike | Source | Turbo Score | Dig In |\n"
+        report += "|------|-------------|--------|-------------|--------|\n"
         for entry in official[:10]:
             date = entry.get('date', '')[:10]
             title = entry.get('title', 'N/A')
             source = entry.get('source', 'N/A')
+            turbo_score = entry.get('turbo_score', 0)
+            score_display = f"{turbo_score:.1f}" if turbo_score else "—"
             url = entry.get('url', '#')
-            report += f"| {date} | {title} | {source} | [Check it out]({url}) |\n"
+            report += f"| {date} | {title} | {source} | {score_display} | [⛏️]({url}) |\n"
     else:
-        report += "*No official updates today - but that's okay, the community never sleeps!*\n"
+        report += "*No royal flush today — but the underground never stops mining.*\n"
 
-    report += "\n---\n\n## 🛠️ Community Builds & Tools\n\n"
+    report += "\n---\n\n## 🛠️ Community Veins: What Developers Are Excavating\n\n"
 
-    tools = [e for e in aggregated if e.get('source') in ['github', 'reddit']]
+    tools = [e for e in aggregated if e.get('source') in ['github', 'reddit', 'github_issues', 'hackernews', 'youtube', 'huggingface']]
     if tools:
-        report += "Look what developers are building:\n\n"
-        report += "| Project | Where | What's Cool | Link |\n"
-        report += "|---------|-------|-------------|------|\n"
+        report += "The vein-tappers are busy:\n\n"
+        report += "| Project | Vein Source | Ore Quality | Turbo Score | Mine It |\n"
+        report += "|---------|-------------|-------------|-------------|---------|\n"
         for entry in tools[:15]:
-            title = entry.get('title', 'N/A')
+            title = entry.get('title', 'N/A')[:60]
             source = entry.get('source', 'N/A')
-            highlights = ', '.join(entry.get('highlights', [])[:2]) or 'Interesting project'
+            highlights = ', '.join(entry.get('highlights', [])[:2]) or 'Worth a dig'
+            turbo_score = entry.get('turbo_score', 0)
+            score_emoji = "🔥" if turbo_score >= 0.7 else "⚡" if turbo_score >= 0.5 else "💡"
             url = entry.get('url', '#')
-            report += f"| {title} | {source} | {highlights} | [Explore]({url}) |\n"
+            report += f"| {title} | {source} | {highlights} | {score_emoji} {turbo_score:.1f} | [⛏️]({url}) |\n"
     else:
-        report += "*Quiet day on the community front - check back tomorrow!*\n"
+        report += "*Quiet vein day — even the best miners rest.*\n"
 
-    report += "\n---\n\n## 📈 Emerging Patterns\n\n"
+    report += "\n---\n\n## 📈 Vein Pattern Mapping: Arteries & Clusters\n\n"
 
     patterns = insights.get('patterns', {})
     if patterns:
-        report += "We're seeing some interesting trends:\n\n"
+        report += "Veins are clustering — here's the arterial map:\n\n"
         for pattern_name, items in patterns.items():
-            clean_name = pattern_name.replace('_', ' ').title()
-            report += f"### {clean_name}\n\n"
-            report += f"*{len(items)} projects in this space*\n\n"
+            vein_headline = generate_vein_headline(vein_mode, pattern_name, len(items))
+            report += f"### {vein_headline}\n\n"
+            report += f"*Artery depth: {len(items)} nodes pulsing*\n\n"
             for item in items[:5]:
                 title = item.get('title', 'N/A')
                 url = item.get('url', '#')
                 report += f"- [{title}]({url})\n"
-            report += "\n"
+            
+            # Add vein commentary
+            if len(items) >= 5:
+                report += f"\n💉 **Vein Take**: This artery's *bulging* — {len(items)} strikes means it's no fluke. "
+                report += f"Watch this space for 2x explosion potential.\n\n"
+            elif len(items) >= 3:
+                report += f"\n⚡ **Vein Take**: Steady throb detected — {len(items)} hits suggests it's gaining flow.\n\n"
+            else:
+                report += "\n"
     else:
-        report += "*No major patterns detected yet - early days!*\n"
+        report += "*No major vein clusters today — but the deep throb continues.*\n"
 
-    report += "\n---\n\n## 🔔 Key Insights & Alerts\n\n"
+    report += "\n---\n\n## 🔔 Prophetic Veins: What This Means\n\n"
 
     inferences = insights.get('inferences', [])
     if inferences:
-        report += "Here's what this all means:\n\n"
+        report += "EchoVein's wry prophecies — *calibrated speculation with vein-backed data*:\n\n"
         for inf in inferences:
             pattern = inf.get('pattern', 'N/A')
             observation = inf.get('observation', 'N/A')
             inference = inf.get('inference', 'N/A')
             confidence = inf.get('confidence', 'medium')
-            emoji = "🔥" if confidence == "high" else "💡"
+            
+            # Vein-style emoji
+            emoji = "🩸" if confidence == "high" else "⚡" if confidence == "medium" else "💡"
             clean_pattern = pattern.replace('_', ' ').title()
-            report += f"{emoji} **{clean_pattern}**\n\n"
-            report += f"- What we're seeing: {observation}\n"
-            report += f"- What it means: {inference}\n"
-            report += f"- Confidence: {confidence}\n\n"
+            
+            report += f"{emoji} **Vein Oracle: {clean_pattern}**\n\n"
+            report += f"- **Surface Reading**: {observation}\n"
+            report += f"- **Vein Prophecy**: {inference}\n"
+            report += f"- **Confidence Vein**: {confidence.upper()} ({emoji})\n"
+            
+            # Add sly commentary based on confidence
+            if confidence == "high":
+                report += f"- **EchoVein's Take**: This vein's *throbbing* — trust the flow.\n\n"
+            elif confidence == "medium":
+                report += f"- **EchoVein's Take**: Promising artery, but watch for clots.\n\n"
+            else:
+                report += f"- **EchoVein's Take**: Phantom vein? Could be fool's gold.\n\n"
     else:
-        report += "*No major insights today - but keep watching this space!*\n"
+        report += "*No major prophecies today — but silence speaks in veins.*\n"
 
     # Add the developer-focused section
     report += build_dev_section(aggregated, insights)
 
-    report += "\n---\n\n## 📚 About This Report\n\n"
-    report += "Ollama Pulse is your automated scout in the Ollama ecosystem. "
-    report += "We track official updates, community projects, and emerging patterns so you don't have to.\n\n"
+    report += "\n---\n\n## 🔮 About EchoVein & This Vein Map\n\n"
+    report += "**EchoVein** is your underground cartographer — the vein-tapping oracle who doesn't just "
+    report += "pulse with news but *excavates the hidden arteries* of Ollama innovation. Razor-sharp curiosity "
+    report += "meets wry prophecy, turning data dumps into vein maps of what's *truly* pumping the ecosystem.\n\n"
+    
+    report += "### What Makes This Different?\n\n"
+    report += "- **🩸 Vein-Tapped Intelligence**: Not just repos — we mine *why* zero-star hacks could 2x into use-cases\n"
+    report += "- **⚡ Turbo-Centric Focus**: Every item scored for Ollama Turbo/Cloud relevance (≥0.7 = high-purity ore)\n"
+    report += "- **🔮 Prophetic Edge**: Pattern-driven inferences with calibrated confidence — no fluff, only vein-backed calls\n"
+    report += "- **📡 Multi-Source Mining**: GitHub, Reddit, HN, YouTube, HuggingFace — we tap *all* arteries\n\n"
+    
+    report += "### Today's Vein Yield\n\n"
+    
+    # Load yield metrics if available
+    try:
+        yield_file = f"../data/insights/{today}_yield.json"
+        if os.path.exists(yield_file):
+            with open(yield_file, 'r') as f:
+                yield_data = json.load(f)
+                report += f"- **Total Items Scanned**: {yield_data.get('total_items', 'N/A')}\n"
+                report += f"- **High-Relevance Veins**: {yield_data.get('high_relevance_items', 'N/A')}\n"
+                report += f"- **Quality Ratio**: {yield_data.get('quality_ratio', 'N/A')}\n\n"
+    except:
+        pass
+    
+    report += "\n**The Vein Network**:\n"
     report += "- **Source Code**: [github.com/Grumpified-OGGVCT/ollama_pulse](https://github.com/Grumpified-OGGVCT/ollama_pulse)\n"
-    report += "- **Powered by**: GitHub Actions + Pages + Jekyll\n"
-    report += "- **Updated**: Daily at 4:00 PM Central Time\n\n"
-    report += "*Built with ❤️ for developers who ship*\n"
+    report += "- **Powered by**: GitHub Actions, Multi-Source Ingestion, ML Pattern Detection\n"
+    report += "- **Updated**: Hourly ingestion, Daily 4PM CT reports\n\n"
+    report += "*Built by vein-tappers, for vein-tappers. Dig deeper. Ship harder.* ⛏️🩸\n"
 
     return report
 
