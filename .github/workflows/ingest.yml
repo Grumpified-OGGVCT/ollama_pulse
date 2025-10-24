@@ -1,8 +1,8 @@
 name: Ollama Pulse Ingestion
 
 on:
-  #   schedule:
-  #     - cron: '0 * * * *'  # Every hour at :00
+  schedule:
+    - cron: '0 * * * *'  # Every hour at :00
   workflow_dispatch:  # Manual trigger
 
 permissions:
@@ -11,23 +11,23 @@ permissions:
 jobs:
   ingest:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT }}
-        
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
           cache: 'pip'
-          
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          
+
       - name: Run ingestion (parallel sources)
         run: |
           python scripts/ingest_official.py
@@ -35,10 +35,10 @@ jobs:
           python scripts/ingest_community.py
           python scripts/ingest_issues.py
           python scripts/ingest_tools.py
-          
+
       - name: Aggregate data
         run: python scripts/aggregate.py
-        
+
       - name: Mine insights
         run: python scripts/mine_insights.py
 
@@ -49,76 +49,90 @@ jobs:
           git add data/
           if ! git diff --quiet || ! git diff --staged --quiet; then
             git commit -m "chore(data): hourly ingestion $(date -u '+%Y-%m-%d %H:%M UTC')"
-            git pull --rebase origin main || git pull origin main
-            git push --force-with-lease origin main
+            # Pull latest changes before pushing
+            git pull --rebase origin main || {
+              # If rebase fails, abort and try merge
+              git rebase --abort
+              git pull origin main --no-rebase
+            }
+            git push origin main
           fi
-  
+
   turbo-cloud-deep:
     runs-on: ubuntu-latest
-    
+    needs: ingest  # Wait for ingest job to complete first
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT }}
-        
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
           cache: 'pip'
-          
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-      
+
       - name: Fetch Ollama Cloud Details
         run: python scripts/ingest_cloud.py --filter=turbo --depth=full
         continue-on-error: true
-      
+
       - name: GitHub Repo Scan
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-            
+
             // Search for Ollama Turbo Cloud repos
             const { data } = await github.rest.search.code({
               q: 'ollama turbo cloud lang:python',
               per_page: 50
             });
-            
+
             // Save results for aggregation
             const results = data.items.map(item => ({
-              title: `${item.repository.full_name}: ${item.name}`,
+              title: `: ``,
               date: new Date().toISOString(),
-              summary: `Code mention in ${item.path}`,
+              summary: `Code mention in ``,
               url: item.html_url,
               source: 'github_code_search',
               highlights: ['code', 'turbo', 'cloud']
             }));
-            
+
             // Append to community data
             const today = new Date().toISOString().split('T')[0];
-            const filename = `data/community/${today}.json`;
-            
+            const filename = `data/community/``.json`;
+
             let existing = [];
             if (fs.existsSync(filename)) {
               existing = JSON.parse(fs.readFileSync(filename, 'utf8'));
             }
-            
+
             const combined = [...existing, ...results];
             const unique = Array.from(new Map(combined.map(e => [e.url, e])).values());
-            
+
             fs.writeFileSync(filename, JSON.stringify(unique, null, 2));
-            console.log(`Saved ${results.length} GitHub code search results`);
+            console.log(`Saved `` GitHub code search results`);
         continue-on-error: true
-      
+
       - name: Commit cloud search data
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore(data): turbo cloud deep scan $(date -u '+%Y-%m-%d %H:%M UTC')" && git push)
+          if ! git diff --quiet || ! git diff --staged --quiet; then
+            git commit -m "chore(data): turbo cloud deep scan $(date -u '+%Y-%m-%d %H:%M UTC')"
+            # Pull latest changes before pushing
+            git pull --rebase origin main || {
+              # If rebase fails, abort and try merge
+              git rebase --abort
+              git pull origin main --no-rebase
+            }
+            git push origin main
+          fi
         continue-on-error: true
-
