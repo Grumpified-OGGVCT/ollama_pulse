@@ -102,7 +102,91 @@
           <button class="control-btn reset-all" title="Reset all settings">Reset All</button>
         </div>
         
-        <div class="keyboard-shortcuts">
+
+        <div class="lingo-legend">
+          <details>
+            <summary>🩸 EchoVein Lingo Legend</summary>
+            <div class="legend-content">
+              <p class="legend-intro">EchoVein speaks in veins and arteries. Here's the decoder ring:</p>
+              
+              <div class="legend-section">
+                <h5>🔬 Core Terminology</h5>
+                <dl>
+                  <dt>Vein</dt>
+                  <dd>A trend, pattern, or discovery in the Ollama ecosystem</dd>
+                  
+                  <dt>Ore / High-Purity Ore</dt>
+                  <dd>A project, repository, or discovery worth mining</dd>
+                  
+                  <dt>Artery</dt>
+                  <dd>A major ecosystem area or category (e.g., "Coding Artery")</dd>
+                  
+                  <dt>Vein-Tapping</dt>
+                  <dd>The process of discovering and analyzing trends</dd>
+                  
+                  <dt>Artery Depth</dt>
+                  <dd>Number of related items in a category/cluster</dd>
+                  
+                  <dt>Vein Map</dt>
+                  <dd>The daily report showing ecosystem patterns</dd>
+                </dl>
+              </div>
+
+              <div class="legend-section">
+                <h5>⚡ Scoring System</h5>
+                <dl>
+                  <dt>🔥 0.7+ (High-Purity)</dt>
+                  <dd>Highly relevant to Ollama Turbo/Cloud features</dd>
+                  
+                  <dt>⚡ 0.4-0.6 (Medium)</dt>
+                  <dd>Moderately relevant, worth watching</dd>
+                  
+                  <dt>💡 0.3-0.4 (Low)</dt>
+                  <dd>Tangentially related, background noise</dd>
+                </dl>
+              </div>
+
+              <div class="legend-section">
+                <h5>🩸 Confidence Levels</h5>
+                <dl>
+                  <dt>🩸 HIGH</dt>
+                  <dd>"This vein's throbbing — trust the flow"</dd>
+                  
+                  <dt>⚡ MEDIUM</dt>
+                  <dd>"Promising artery, but watch for clots"</dd>
+                  
+                  <dt>💡 LOW</dt>
+                  <dd>"Faint pulse — needs more data"</dd>
+                </dl>
+              </div>
+
+              <div class="legend-section">
+                <h5>📊 Pattern Types</h5>
+                <dl>
+                  <dt>Vein Maintenance</dt>
+                  <dd>Steady, ongoing activity in a category</dd>
+                  
+                  <dt>Vein Explosion</dt>
+                  <dd>Sudden spike in activity (2x+ growth potential)</dd>
+                  
+                  <dt>Vein Oracle</dt>
+                  <dd>Predictive insight about future trends</dd>
+                </dl>
+              </div>
+
+              <div class="legend-section">
+                <h5>🎯 EchoVein's Voice</h5>
+                <p class="legend-note">
+                  EchoVein doesn't just report — they <em>excavate</em>. 
+                  The wry, vein-obsessed tone is intentional: it cuts through 
+                  AI-generated fluff and delivers sharp, actionable intelligence. 
+                  Think of it as your underground cartographer mapping the 
+                  Ollama ecosystem's hidden arteries.
+                </p>
+              </div>
+            </div>
+          </details>
+        </div>        <div class="keyboard-shortcuts">
           <details>
             <summary>Keyboard Shortcuts</summary>
             <ul>
@@ -361,3 +445,4 @@
     initAccessibility();
   }
 })();
+

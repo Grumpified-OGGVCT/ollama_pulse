@@ -4,24 +4,83 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+
     {% seo %}
-    
+
     <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Available reports metadata for JavaScript navigation -->
     <meta name="available-reports" content='{{ site.data.reports | default: "[]" }}'>
-    
+
     <title>{{ page.title | default: site.title }}</title>
   </head>
   <body>
+    <!-- Modern Navigation Bar -->
+    <nav class="main-nav" id="mainNav">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <a href="{{ '/' | relative_url }}" class="brand-link">
+            <span class="brand-icon">🩸</span>
+            <span class="brand-text">{{ site.title | default: "Ollama Pulse" }}</span>
+          </a>
+          <span class="brand-tagline">{{ site.description | default: "Daily Ecosystem Intelligence" }}</span>
+        </div>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+          <span class="hamburger"></span>
+          <span class="hamburger"></span>
+          <span class="hamburger"></span>
+        </button>
+
+        <div class="nav-menu" id="navMenu">
+          <div class="nav-links">
+            <a href="{{ '/' | relative_url }}" class="nav-link">
+              <i class="fas fa-home"></i>
+              <span>Home</span>
+            </a>
+            <a href="{{ '/reports/' | relative_url }}" class="nav-link">
+              <i class="fas fa-archive"></i>
+              <span>Reports Archive</span>
+            </a>
+            <div class="nav-dropdown">
+              <button class="nav-link dropdown-toggle" id="recentDropdown">
+                <i class="fas fa-clock"></i>
+                <span>Recent Reports</span>
+                <i class="fas fa-chevron-down dropdown-icon"></i>
+              </button>
+              <div class="dropdown-menu" id="recentReportsMenu">
+                <!-- Populated by JavaScript -->
+              </div>
+            </div>
+            <a href="https://github.com/Grumpified-OGGVCT/ollama_pulse" class="nav-link" target="_blank">
+              <i class="fab fa-github"></i>
+              <span>GitHub</span>
+            </a>
+          </div>
+
+          <div class="nav-search">
+            <div class="search-box">
+              <i class="fas fa-search search-icon"></i>
+              <input type="text" id="navSearchInput" placeholder="Search reports..." class="search-input" />
+              <button class="search-clear" id="navSearchClear" aria-label="Clear search">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="search-results-dropdown" id="navSearchResults"></div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Breadcrumb Navigation -->
+    <div class="breadcrumb-container" id="breadcrumbNav">
+      <!-- Populated by JavaScript on report pages -->
+    </div>
+
+    <!-- Main Content -->
     <div id="container">
       <div class="inner">
-        <header>
-          <h1><a href="{{ '/' | relative_url }}">{{ site.title | default: site.github.repository_name }}</a></h1>
-          <h2>{{ site.description | default: site.github.project_tagline }}</h2>
-        </header>
-
         <section id="main_content" class="wrapper">
           {{ content }}
         </section>
@@ -34,8 +93,9 @@
         </footer>
       </div>
     </div>
-    
+
     <!-- Navigation and Accessibility Scripts -->
+    <script src="{{ '/assets/js/modern-nav.js' | relative_url }}"></script>
     <script src="{{ '/assets/js/navigation.js' | relative_url }}"></script>
     <script src="{{ '/assets/js/accessibility.js' | relative_url }}"></script>
   </body>
