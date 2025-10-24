@@ -3,13 +3,19 @@ layout: default
 title: Ollama Pulse - Daily Ecosystem Intelligence
 ---
 
-<div style="margin-bottom: 30px;">
-  <h2 style="color: #60a5fa; font-size: 28px; margin-bottom: 12px;">Welcome to Ollama Pulse</h2>
-  <p style="color: #94a3b8; font-size: 16px; line-height: 1.6;">
-    Your daily vein-tapping oracle for the Ollama ecosystem. EchoVein excavates hidden arteries of innovation, 
-    delivering sharp intelligence on models, tools, and trends. Use the navigation above to explore reports, 
-    or dive into the latest discoveries below.
-  </p>
+<div style="margin-bottom: 20px;">
+  <h2 style="color: #60a5fa;">Welcome to Ollama Pulse</h2>
+  <p style="color: #94a3b8;">Daily ecosystem intelligence tracking the Ollama world. Navigate through reports, search for topics, and customize your reading experience with accessibility controls.</p>
+  
+  <div style="background: #1e293b; padding: 16px; border-radius: 8px; margin: 16px 0; border: 1px solid #334155;">
+    <h3 style="color: #60a5fa; margin-top: 0;">🎯 Features</h3>
+    <ul style="color: #e2e8f0; line-height: 1.8;">
+      <li><strong>Navigation:</strong> Use Next/Previous buttons or arrow keys to browse reports</li>
+      <li><strong>Search:</strong> Press <kbd style="background: #0f172a; padding: 2px 6px; border-radius: 3px;">/</kbd> to search across reports</li>
+      <li><strong>Accessibility:</strong> Click the ♿ button (bottom-right) to customize font size and zoom</li>
+      <li><strong>Keyboard Shortcuts:</strong> <kbd>h</kbd> for home, <kbd>n</kbd> for next, <kbd>p</kbd> for previous</li>
+    </ul>
+  </div>
 </div>
 
 <div class="controls">
@@ -49,7 +55,7 @@ title: Ollama Pulse - Daily Ecosystem Intelligence
   const sortSelect = document.getElementById('sort');
   const reportList = document.getElementById('report-list');
   const cards = Array.from(reportList.querySelectorAll('.card'));
-
+  
   searchInput.addEventListener('input', function(e) {
     const query = e.target.value.toLowerCase();
     cards.forEach(card => {
@@ -57,7 +63,7 @@ title: Ollama Pulse - Daily Ecosystem Intelligence
       card.style.display = text.includes(query) ? 'block' : 'none';
     });
   });
-
+  
   sortSelect.addEventListener('change', function(e) {
     const sorted = cards.sort((a, b) => {
       const dateA = a.querySelector('h3').textContent.match(/\d{4}-\d{2}-\d{2}/)[0];
