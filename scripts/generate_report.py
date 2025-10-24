@@ -8,6 +8,15 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+# Import review database integration
+try:
+    from review_integration import ReviewIntegration
+    REVIEW_DB_AVAILABLE = True
+except ImportError:
+    REVIEW_DB_AVAILABLE = False
+    print('⚠️  Review database not available - running without historical context')
+
+
 DOCS_DIR = Path("../docs")
 REPORTS_DIR = DOCS_DIR / "reports"
 
@@ -156,7 +165,7 @@ def generate_vein_headline(mode, pattern_name, items_count):
     return headlines.get(mode_name, f"{emoji} **{clean_pattern}**: {items_count} items detected")
 
 
-def generate_report_md(aggregated, insights):
+def generate_report_md(aggregated, insights, historical_context=None):
     """Generate EchoVein-style conversational Markdown report"""
     today = get_today_date_str()
     
@@ -444,15 +453,51 @@ title: Ollama Pulse - Daily Ecosystem Intelligence
 
 def main():
     print("🚀 Starting conversational report generation...")
+    
+    # Initialize review integration if available
+    integration = None
+    if REVIEW_DB_AVAILABLE:
+        try:
+            integration = ReviewIntegration()
+            print("✅ Review database integration enabled")
+        except Exception as e:
+            print(f"⚠️  Review database error: {e}")
+    
     aggregated, insights = load_data()
-
+    
     if not aggregated and not insights:
         print("⚠️  No data available to generate report")
         return
-
-    report_md = generate_report_md(aggregated, insights)
+    
+    # Get historical context
+    historical_context = {}
+    if integration:
+        try:
+            historical_context = integration.get_historical_context_for_items(aggregated)
+            print(f"📊 Retrieved historical context for {len(historical_context)} items")
+        except Exception as e:
+            print(f"⚠️  Error getting historical context: {e}")
+    
+    report_md = generate_report_md(aggregated, insights, historical_context)
     save_report(report_md)
-
+    
+    # Store new reviews
+    if integration:
+        try:
+            today = get_today_date_str()
+            stored_count = 0
+            for item in aggregated:
+                review = integration.process_ollama_pulse_item(
+                    item=item,
+                    review_date=today,
+                    persona="EchoVein"
+                )
+                integration.db.add_review(review)
+                stored_count += 1
+            print(f"💾 Stored {stored_count} reviews in database")
+        except Exception as e:
+            print(f"⚠️  Error storing reviews: {e}")
+    
     print("✅ Report generation complete!")
 
 
