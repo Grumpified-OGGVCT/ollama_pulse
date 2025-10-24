@@ -431,7 +431,7 @@
           resetZoom();
         } else if (e.key === 'a' || e.key === 'A') {
           e.preventDefault();
-          const toggle = document.querySelector('.accessibility-toggle');
+          const toggle = document.getElementById('navAccessibilityToggle');
           if (toggle) toggle.click();
         }
       }
@@ -445,4 +445,5 @@
     initAccessibility();
   }
 })();
+
 

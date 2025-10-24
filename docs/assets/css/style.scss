@@ -947,3 +947,93 @@ body {
     justify-content: space-between;
   }
 }
+
+/* Navigation Accessibility Button */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-accessibility-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #334155;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 18px;
+}
+
+.nav-accessibility-toggle:hover {
+  background: #475569;
+  border-color: #60a5fa;
+  color: #60a5fa;
+}
+
+.nav-accessibility-toggle.active {
+  background: #60a5fa;
+  border-color: #3b82f6;
+  color: #fff;
+}
+
+.nav-accessibility-toggle i {
+  font-size: 18px;
+}
+
+/* Update accessibility panel positioning */
+.accessibility-panel {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 1999;
+}
+
+.accessibility-controls {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 16px;
+  width: 320px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+/* Remove old floating button styles */
+.accessibility-toggle {
+  display: none !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .nav-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .nav-search {
+    width: 100%;
+  }
+  
+  .nav-accessibility-toggle {
+    width: 100%;
+    height: 44px;
+  }
+  
+  .accessibility-panel {
+    top: 70px;
+    right: 10px;
+    left: 10px;
+  }
+  
+  .accessibility-controls {
+    width: auto;
+  }
+}

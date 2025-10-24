@@ -59,15 +59,22 @@
             </a>
           </div>
 
-          <div class="nav-search">
-            <div class="search-box">
-              <i class="fas fa-search search-icon"></i>
-              <input type="text" id="navSearchInput" placeholder="Search reports..." class="search-input" />
-              <button class="search-clear" id="navSearchClear" aria-label="Clear search">
-                <i class="fas fa-times"></i>
-              </button>
+          <div class="nav-actions">
+            <div class="nav-search">
+              <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="navSearchInput" placeholder="Search reports..." class="search-input" />
+                <button class="search-clear" id="navSearchClear" aria-label="Clear search">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <div class="search-results-dropdown" id="navSearchResults"></div>
             </div>
-            <div class="search-results-dropdown" id="navSearchResults"></div>
+
+            <!-- Accessibility button in nav bar -->
+            <button class="nav-accessibility-toggle" id="navAccessibilityToggle" aria-label="Toggle accessibility controls" title="Accessibility Controls (Alt+A)">
+              <i class="fas fa-universal-access"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -85,7 +92,7 @@
           {{ content }}
         </section>
 
-        <footer>
+        <footer style="text-align: center;">
           {% if site.github.is_project_page %}
             <p>Project maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
           {% endif %}
