@@ -10,3 +10,49 @@
 .card h3 { margin: 0 0 8px 0; color: #60a5fa; }
 .meta { color: #94a3b8; font-size: 0.9em; margin-top: 4px; }
 #report-list { margin-top: 20px; }
+
+/* Navigation Controls */
+.report-navigation { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; margin: 20px 0; }
+.nav-controls { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; justify-content: center; }
+.nav-btn { padding: 10px 20px; background: #334155; border: 1px solid #475569; border-radius: 6px; color: #e2e8f0; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s ease; }
+.nav-btn:hover:not(:disabled) { background: #475569; border-color: #60a5fa; transform: translateY(-1px); }
+.nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.nav-search-container { position: relative; max-width: 600px; margin: 0 auto; }
+.nav-search { width: 100%; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 14px; }
+.nav-search:focus { outline: none; border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1); }
+.search-results { position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid #334155; border-radius: 6px; margin-top: 4px; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+.search-result { padding: 12px; border-bottom: 1px solid #334155; cursor: pointer; transition: background 0.2s ease; color: #e2e8f0; text-decoration: none; display: block; }
+.search-result:hover { background: #334155; }
+.search-result:last-child { border-bottom: none; }
+.search-result.current { background: #334155; border-left: 3px solid #60a5fa; }
+.result-title { font-weight: 600; color: #60a5fa; margin-bottom: 4px; }
+.result-snippet { font-size: 13px; color: #94a3b8; }
+.result-snippet mark { background: #fbbf24; color: #0f172a; padding: 2px 4px; border-radius: 2px; }
+.search-no-results { padding: 12px; text-align: center; color: #94a3b8; }
+
+/* Accessibility Panel */
+.accessibility-panel { position: fixed; bottom: 20px; right: 20px; z-index: 2000; }
+.accessibility-toggle { width: 50px; height: 50px; border-radius: 50%; background: #60a5fa; border: 2px solid #3b82f6; color: #fff; font-size: 24px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
+.accessibility-toggle:hover { background: #3b82f6; transform: scale(1.05); }
+.accessibility-controls { position: absolute; bottom: 60px; right: 0; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+.accessibility-controls h4 { margin: 0 0 12px 0; color: #60a5fa; font-size: 16px; }
+.control-group { margin-bottom: 12px; }
+.control-group label { display: block; margin-bottom: 6px; color: #e2e8f0; font-size: 13px; }
+.button-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.control-btn { padding: 6px 12px; background: #334155; border: 1px solid #475569; border-radius: 4px; color: #e2e8f0; cursor: pointer; font-size: 13px; transition: all 0.2s ease; }
+.control-btn:hover { background: #475569; border-color: #60a5fa; }
+.reset-all { width: 100%; background: #dc2626; border-color: #b91c1c; }
+.reset-all:hover { background: #b91c1c; }
+.keyboard-shortcuts { margin-top: 12px; font-size: 12px; }
+.keyboard-shortcuts summary { cursor: pointer; color: #94a3b8; padding: 4px 0; }
+.keyboard-shortcuts ul { margin: 8px 0 0 0; padding-left: 20px; color: #94a3b8; }
+.keyboard-shortcuts li { margin: 4px 0; }
+.keyboard-shortcuts kbd { background: #0f172a; border: 1px solid #334155; border-radius: 3px; padding: 2px 6px; font-family: monospace; font-size: 11px; color: #60a5fa; }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .nav-controls { flex-direction: column; }
+  .nav-btn { width: 100%; }
+  .accessibility-panel { bottom: 10px; right: 10px; }
+  .accessibility-controls { width: 280px; right: -10px; }
+}

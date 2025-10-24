@@ -316,16 +316,37 @@ def generate_report_md(aggregated, insights):
     return report
 
 
+def get_all_reports():
+    """Get list of all available reports"""
+    reports = []
+    if REPORTS_DIR.exists():
+        for md_file in sorted(REPORTS_DIR.glob("pulse-*.md"), reverse=True):
+            # Extract date from filename
+            filename = md_file.stem
+            if filename.startswith("pulse-"):
+                reports.append(filename)
+    return reports
+
+
 def save_report(report_md):
     """Save the report as both Markdown and HTML with Jekyll front matter"""
     ensure_reports_dir()
     today = get_today_date_str()
 
-    # Add Jekyll front matter
+    # Add Jekyll front matter with available reports metadata
+    all_reports = get_all_reports()
+    # Add current report if not in list
+    if f"pulse-{today}" not in all_reports:
+        all_reports.insert(0, f"pulse-{today}")
+    
+    reports_json = json.dumps(all_reports)
+    
     md_front_matter = f"""---
 layout: default
 title: Pulse {today}
 ---
+
+<meta name="available-reports" content='{reports_json}'>
 
 """
 
@@ -338,34 +359,87 @@ title: Pulse {today}
     # Update index.html with Jekyll front matter
     index_front_matter = """---
 layout: default
-title: Ollama Pulse
+title: Ollama Pulse - Daily Ecosystem Intelligence
 ---
 
 """
 
-    # Create a simple index that links to the latest report
-    index_body = f"""<div class="controls">
-  <input type="text" id="search" placeholder="Search reports..." />
+    # Create enhanced index with all reports listed
+    all_reports_list = get_all_reports()
+    reports_html = ""
+    
+    for idx, report_name in enumerate(all_reports_list):
+        report_date = report_name.replace('pulse-', '')
+        is_latest = idx == 0
+        badge = ' <span style="background: #60a5fa; color: #0f172a; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">LATEST</span>' if is_latest else ''
+        
+        reports_html += f"""  <div class="card">
+    <h3>{'📡 ' if is_latest else ''}Report: {report_date}{badge}</h3>
+    <p>Ollama ecosystem discoveries from {report_date}</p>
+    <p class="meta">Generated: {report_date}</p>
+    <a href="reports/{report_name}.html">Read full report →</a>
+  </div>
+"""
+
+    index_body = f"""<div style="margin-bottom: 20px;">
+  <h2 style="color: #60a5fa;">Welcome to Ollama Pulse</h2>
+  <p style="color: #94a3b8;">Daily ecosystem intelligence tracking the Ollama world. Navigate through reports, search for topics, and customize your reading experience with accessibility controls.</p>
+  
+  <div style="background: #1e293b; padding: 16px; border-radius: 8px; margin: 16px 0; border: 1px solid #334155;">
+    <h3 style="color: #60a5fa; margin-top: 0;">🎯 Features</h3>
+    <ul style="color: #e2e8f0; line-height: 1.8;">
+      <li><strong>Navigation:</strong> Use Next/Previous buttons or arrow keys to browse reports</li>
+      <li><strong>Search:</strong> Press <kbd style="background: #0f172a; padding: 2px 6px; border-radius: 3px;">/</kbd> to search across reports</li>
+      <li><strong>Accessibility:</strong> Click the ♿ button (bottom-right) to customize font size and zoom</li>
+      <li><strong>Keyboard Shortcuts:</strong> <kbd>h</kbd> for home, <kbd>n</kbd> for next, <kbd>p</kbd> for previous</li>
+    </ul>
+  </div>
+</div>
+
+<div class="controls">
+  <input type="text" id="search" placeholder="🔍 Search reports by date or keyword..." />
   <select id="sort">
-    <option value="date">Sort by Date</option>
-    <option value="items">Sort by Items</option>
+    <option value="date-desc">Newest First</option>
+    <option value="date-asc">Oldest First</option>
   </select>
 </div>
 
 <div id="report-list">
-  <div class="card">
-    <h3>Latest Report: {today}</h3>
-    <p>Check out today's Ollama ecosystem discoveries!</p>
-    <p class="meta">Generated: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}</p>
-    <a href="reports/pulse-{today}.html">Read full report →</a>
-  </div>
+{reports_html}
 </div>
+
+<script>
+// Simple search and sort for index page
+(function() {{
+  const searchInput = document.getElementById('search');
+  const sortSelect = document.getElementById('sort');
+  const reportList = document.getElementById('report-list');
+  const cards = Array.from(reportList.querySelectorAll('.card'));
+  
+  searchInput.addEventListener('input', function(e) {{
+    const query = e.target.value.toLowerCase();
+    cards.forEach(card => {{
+      const text = card.textContent.toLowerCase();
+      card.style.display = text.includes(query) ? 'block' : 'none';
+    }});
+  }});
+  
+  sortSelect.addEventListener('change', function(e) {{
+    const sorted = cards.sort((a, b) => {{
+      const dateA = a.querySelector('h3').textContent.match(/\\d{{4}}-\\d{{2}}-\\d{{2}}/)[0];
+      const dateB = b.querySelector('h3').textContent.match(/\\d{{4}}-\\d{{2}}-\\d{{2}}/)[0];
+      return e.target.value === 'date-desc' ? dateB.localeCompare(dateA) : dateA.localeCompare(dateB);
+    }});
+    sorted.forEach(card => reportList.appendChild(card));
+  }});
+}})();
+</script>
 """
 
     index_path = DOCS_DIR / "index.html"
     with open(index_path, 'w', encoding='utf-8') as f:
         f.write(index_front_matter + index_body)
-    print(f"💾 Updated index.html")
+    print(f"💾 Updated index.html with {len(all_reports_list)} reports")
 
 
 def main():
