@@ -206,6 +206,62 @@ Provide:
         
         return json.loads(response)
 
+    async def iterative_research_workflow(
+        self,
+        initial_query: str,
+        max_iterations: int = 3,
+        effort_level: str = "medium"
+    ) -> Dict:
+        """
+        Self-iterative research workflow using GPT-OSS 120B
+
+        Uses GPT-OSS 120B's built-in self-iterative capabilities:
+        - Configurable effort levels (low/medium/high)
+        - RLHF-tuned reasoning traces for transparency
+        - Iterative refinement with explainable steps
+
+        Args:
+            initial_query: Research question or task
+            max_iterations: Number of refinement iterations
+            effort_level: "low", "medium", or "high" reasoning effort
+
+        Returns:
+            Dict with final_output, reasoning_trace, iterations
+        """
+
+        prompt = f"""Research Task: {initial_query}
+
+Effort Level: {effort_level}
+Max Iterations: {max_iterations}
+
+Use your self-iterative capabilities to:
+1. Generate initial analysis
+2. Critique and identify gaps
+3. Refine iteratively
+4. Provide final synthesis with full reasoning trace
+
+Show your work at each step."""
+
+        schema = {
+            "type": "object",
+            "properties": {
+                "final_output": {"type": "string"},
+                "reasoning_trace": {"type": "array", "items": {"type": "string"}},
+                "iterations_used": {"type": "integer"},
+                "confidence_score": {"type": "number"}
+            }
+        }
+
+        response = await self.generate(
+            model='gpt-oss:120b-cloud',
+            prompt=prompt,
+            max_tokens=3000,
+            temperature=0.7,
+            structured_output=schema
+        )
+
+        return json.loads(response)
+
     async def embed_batch(
         self,
         model: str,
@@ -214,33 +270,33 @@ Provide:
     ) -> List[List[float]]:
         """
         Generate embeddings with rate limiting
-        
+
         Args:
             model: Embedding model (e.g., 'nomic-embed-text')
             texts: List of texts to embed
             delay: Delay between requests (seconds)
-        
+
         Returns:
             List of embedding vectors
         """
         embeddings = []
-        
+
         for text in texts:
             url = f"{self.base_url}/api/embeddings"
             payload = {'model': model, 'prompt': text}
-            
+
             async with self.session.post(url, json=payload) as response:
                 response.raise_for_status()
                 data = await response.json()
                 embeddings.append(data['embedding'])
-            
+
             # Rate limiting
             await asyncio.sleep(delay)
-        
+
         return embeddings
 
 
-# Recommended models for Ollama Pulse (Based on verified 2025 benchmarks)
+# Recommended models for Ollama Pulse (Based on verified 2025 benchmarks + capabilities)
 MODELS = {
     # STRUCTURED EXTRACTION - DeepSeek-V3.1 (81.0% GPQA - Group Leader in Science)
     # Best for: Logical analysis, structured data extraction, toggleable Think mode
@@ -249,6 +305,11 @@ MODELS = {
     # WEB SEARCH SYNTHESIS - Kimi-K2 (66.1% Tau-Bench - Agentic Leader)
     # Best for: Connecting diverse sources, long-form synthesis, 256K→1M context
     'web_search': 'kimi-k2:1t-cloud',
+
+    # ITERATIVE RESEARCH/PLANNING - GPT-OSS 120B (97.9% AIME, 1320 Arena Elo)
+    # Best for: Self-iterative workflows, template generation, explainable reasoning
+    # Special: Configurable effort levels, RLHF-tuned reasoning traces, agent debugging
+    'iterative_research': 'gpt-oss:120b-cloud',
 
     # FAST VALIDATION - GPT-OSS 20B (25-30 t/s - Group Fastest)
     # Best for: Quick fact-checking, rapid validation, high-volume screening
