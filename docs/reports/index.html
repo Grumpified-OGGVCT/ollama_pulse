@@ -1,0 +1,229 @@
+---
+layout: default
+title: Reports Archive - Ollama Pulse
+---
+
+<style>
+.archive-header {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #60a5fa;
+}
+
+.archive-controls {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.archive-controls input,
+.archive-controls select {
+  padding: 10px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #e2e8f0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.archive-controls input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.calendar-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.calendar-day {
+  padding: 15px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.calendar-day:hover {
+  background: #334155;
+  border-color: #60a5fa;
+}
+
+.calendar-day.has-report {
+  background: #1e3a5f;
+  border-color: #60a5fa;
+}
+
+.calendar-day .date {
+  font-size: 18px;
+  font-weight: bold;
+  color: #60a5fa;
+  margin-bottom: 5px;
+}
+
+.calendar-day .count {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.list-view .report-item {
+  padding: 20px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  transition: all 0.2s;
+}
+
+.list-view .report-item:hover {
+  background: #334155;
+  border-color: #60a5fa;
+}
+
+.report-item h3 {
+  margin: 0 0 10px 0;
+  color: #60a5fa;
+}
+
+.report-item .meta {
+  color: #94a3b8;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.report-item .excerpt {
+  color: #cbd5e1;
+  margin-bottom: 15px;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 10px;
+}
+
+.view-toggle button {
+  padding: 8px 16px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-toggle button.active {
+  background: #60a5fa;
+  border-color: #60a5fa;
+  color: #0f172a;
+}
+</style>
+
+<div class="archive-header">
+  <h1>📚 Reports Archive</h1>
+  <p style="color: #94a3b8;">Browse all Ollama Pulse reports by date or search for specific topics.</p>
+</div>
+
+<div class="archive-controls">
+  <input type="text" id="archiveSearch" placeholder="🔍 Search reports..." />
+  <select id="sortOrder">
+    <option value="date-desc">Newest First</option>
+    <option value="date-asc">Oldest First</option>
+  </select>
+  <div class="view-toggle">
+    <button id="listViewBtn" class="active">📋 List</button>
+    <button id="calendarViewBtn">📅 Calendar</button>
+  </div>
+</div>
+
+<div id="listView" class="list-view">
+  <!-- Populated by JavaScript -->
+</div>
+
+<div id="calendarView" class="calendar-view" style="display: none;">
+  <!-- Populated by JavaScript -->
+</div>
+
+<script>
+(function() {
+  // Get all reports from the reports directory
+  const reports = [
+    { date: '2025-10-24', title: 'Pulse 2025-10-24', url: '/ollama_pulse/reports/pulse-2025-10-24.html' },
+    { date: '2025-10-23', title: 'Pulse 2025-10-23', url: '/ollama_pulse/reports/pulse-2025-10-23.html' },
+    { date: '2025-10-22', title: 'Pulse 2025-10-22', url: '/ollama_pulse/reports/pulse-2025-10-22.html' }
+  ];
+
+  const listView = document.getElementById('listView');
+  const calendarView = document.getElementById('calendarView');
+  const listViewBtn = document.getElementById('listViewBtn');
+  const calendarViewBtn = document.getElementById('calendarViewBtn');
+  const searchInput = document.getElementById('archiveSearch');
+  const sortOrder = document.getElementById('sortOrder');
+
+  function renderListView(filteredReports) {
+    listView.innerHTML = filteredReports.map(report => 
+      <div class="report-item">
+        <h3><a href="+${report.url}+" style="color: #60a5fa; text-decoration: none;">+${report.title}+</a></h3>
+        <div class="meta">📅 +${report.date}+</div>
+        <div class="excerpt">Ollama ecosystem discoveries and insights</div>
+        <a href="+${report.url}+" style="color: #60a5fa;">Read full report →</a>
+      </div>
+    ).join('');
+  }
+
+  function renderCalendarView(filteredReports) {
+    calendarView.innerHTML = filteredReports.map(report => 
+      <div class="calendar-day has-report" onclick="window.location.href='+${report.url}+'">
+        <div class="date">+${report.date.split('-')[2]}+</div>
+        <div class="count">+${report.date}+</div>
+      </div>
+    ).join('');
+  }
+
+  function filterAndSort() {
+    let filtered = reports;
+    const query = searchInput.value.toLowerCase();
+    
+    if (query) {
+      filtered = reports.filter(r => 
+        r.title.toLowerCase().includes(query) || 
+        r.date.includes(query)
+      );
+    }
+
+    const order = sortOrder.value;
+    filtered.sort((a, b) => {
+      return order === 'date-desc' ? 
+        b.date.localeCompare(a.date) : 
+        a.date.localeCompare(b.date);
+    });
+
+    renderListView(filtered);
+    renderCalendarView(filtered);
+  }
+
+  listViewBtn.addEventListener('click', () => {
+    listView.style.display = 'block';
+    calendarView.style.display = 'none';
+    listViewBtn.classList.add('active');
+    calendarViewBtn.classList.remove('active');
+  });
+
+  calendarViewBtn.addEventListener('click', () => {
+    listView.style.display = 'none';
+    calendarView.style.display = 'grid';
+    calendarViewBtn.classList.add('active');
+    listViewBtn.classList.remove('active');
+  });
+
+  searchInput.addEventListener('input', filterAndSort);
+  sortOrder.addEventListener('change', filterAndSort);
+
+  // Initial render
+  filterAndSort();
+})();
+</script>
