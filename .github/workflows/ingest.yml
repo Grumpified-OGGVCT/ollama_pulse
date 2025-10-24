@@ -1,8 +1,8 @@
 name: Ollama Pulse Ingestion
 
 on:
-  schedule:
-    - cron: '0 * * * *'  # Every hour at :00
+  #   schedule:
+  #     - cron: '0 * * * *'  # Every hour at :00
   workflow_dispatch:  # Manual trigger
 
 permissions:
@@ -47,7 +47,11 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore(data): hourly ingestion $(date -u '+%Y-%m-%d %H:%M UTC')" && git push)
+          if ! git diff --quiet || ! git diff --staged --quiet; then
+            git commit -m "chore(data): hourly ingestion $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git pull --rebase origin main || git pull origin main
+            git push --force-with-lease origin main
+          fi
   
   turbo-cloud-deep:
     runs-on: ubuntu-latest
