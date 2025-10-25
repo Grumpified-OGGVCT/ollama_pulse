@@ -2,61 +2,77 @@ name: Ollama Pulse Daily Report
 
 on:
   schedule:
-    - cron: '0 21 * * *'   # 16:00 CDT (UTC-5)
-    - cron: '0 22 * * *'   # 16:00 CST (UTC-6)
-  workflow_dispatch:  # Manual trigger
+    - cron: '0 13 * * *'   # 08:00 CDT/CST (UTC-5/-6)
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Force run even if not 08:00 CT'
+        required: false
+        default: 'false'
+        type: boolean
 
 permissions:
   contents: write
   pages: write
   id-token: write
 
+concurrency:
+  group: ollama-pulse-daily-report
+  cancel-in-progress: false
+
 jobs:
   daily_report:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT }}
-        
+          fetch-depth: 0
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
           cache: 'pip'
-          
+          cache-dependency-path: requirements.txt
+
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          
-      - name: Gate by Chicago local time (ensure 16:00)
+        run: pip install -r requirements.txt
+
+      - name: Gate by Chicago local time (ensure 08:00 CT)
+        if: ${{ !inputs.force_run }}
         env:
           TZ: America/Chicago
         run: |
-          echo "Local time: $(date)";
-          HOUR=$(date +%H);
-          if [ "$HOUR" != "16" ]; then
-            echo "Not 16:00 local — exiting without generating report.";
-            exit 0;
+          echo "Local time: $(date)"
+          HOUR=$(date +%H)
+          if [ "$HOUR" != "08" ]; then
+            echo "::warning::Not 08:00 CT (current: ${HOUR}:00) â€” skipping"
+            exit 0
           fi
-          
+          echo "âœ“ Time gate passed: 08:00 CT"
+
       - name: Generate themed daily report
         run: |
           cd scripts
           python generate_report.py
-          
+          echo "::notice::Report generated"
+
       - name: Commit and push report
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add docs/
-          if ! git diff --quiet || ! git diff --staged --quiet; then
-            git commit -m "feat(report): daily wrap-up $(date -u '+%Y-%m-%d')"
-            git pull --rebase origin main || {
-              git rebase --abort
-              git pull origin main --no-rebase
-            }
-            git push origin main
-          fi
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "feat(report): daily Ollama Pulse $(date -u '+%Y-%m-%d')"
+          file_pattern: 'docs/**'
+          commit_user_name: Ollama Pulse Bot
+          commit_user_email: pulse@ollama-pulse.github.io
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-report-${{ github.run_number }}
+          path: docs/reports/
+          retention-days: 7
+          if-no-files-found: warn
