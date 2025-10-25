@@ -1,1 +1,50 @@
-$content
+name: Daily Ollama Pulse Report
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Generate daily report
+        run: python scripts/generate_report.py
+
+      - name: Commit and push report
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs/
+          if ! git diff --quiet || ! git diff --staged --quiet; then
+            git commit -m "docs: update daily report $(date -u '+%Y-%m-%d')"
+            git pull --rebase origin main || {
+              git rebase --abort
+              git pull origin main --no-rebase
+            }
+            git push origin main
+          fi
