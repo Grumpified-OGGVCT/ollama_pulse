@@ -85,14 +85,14 @@ def aggregate_data():
     # Load from all sources
     official = load_source_data("official")
     community = load_source_data("community")
-    tools = load_source_data("tools")
+    tools = load_source_data("tools")`n    bounties = load_source_data("bounties")
     
     print(f"  📊 Official: {len(official)} entries")
     print(f"  📊 Community: {len(community)} entries")
-    print(f"  📊 Tools: {len(tools)} entries")
+    print(f"  📊 Tools: {len(tools)} entries")`n    print(f"  💰 Bounties: {len(bounties)} entries")
     
     # Combine all
-    all_entries = official + community + tools
+    all_entries = official + community + tools + bounties
     
     # Deduplicate by URL
     unique_entries = list({e['url']: e for e in all_entries}.values())
@@ -163,4 +163,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
