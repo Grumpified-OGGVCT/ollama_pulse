@@ -1,9 +1,10 @@
-name: Daily Ollama Pulse Report
+name: Ollama Pulse Daily Report
 
 on:
   schedule:
-    - cron: '0 8 * * *'  # Daily at 8:00 AM UTC
-  workflow_dispatch:
+    - cron: '0 21 * * *'   # 16:00 CDT (UTC-5)
+    - cron: '0 22 * * *'   # 16:00 CST (UTC-6)
+  workflow_dispatch:  # Manual trigger
 
 permissions:
   contents: write
@@ -11,35 +12,48 @@ permissions:
   id-token: write
 
 jobs:
-  generate-report:
+  daily_report:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT }}
-
+        
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
           cache: 'pip'
-
+          
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-
-      - name: Generate daily report
-        run: python scripts/generate_report.py
-
+          
+      - name: Gate by Chicago local time (ensure 16:00)
+        env:
+          TZ: America/Chicago
+        run: |
+          echo "Local time: $(date)";
+          HOUR=$(date +%H);
+          if [ "$HOUR" != "16" ]; then
+            echo "Not 16:00 local — exiting without generating report.";
+            exit 0;
+          fi
+          
+      - name: Generate themed daily report
+        run: |
+          cd scripts
+          python generate_report.py
+          
       - name: Commit and push report
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add docs/
           if ! git diff --quiet || ! git diff --staged --quiet; then
-            git commit -m "docs: daily report $(date -u '+%Y-%m-%d')"
+            git commit -m "feat(report): daily wrap-up $(date -u '+%Y-%m-%d')"
             git pull --rebase origin main || {
               git rebase --abort
               git pull origin main --no-rebase
