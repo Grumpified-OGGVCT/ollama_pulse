@@ -10,7 +10,7 @@ from pathlib import Path
 
 # Import review database integration
 try:
-    from review_integration import ReviewIntegration
+    from review_integration import ReviewIntegration`nfrom bounty_section import render_bounty_section
     REVIEW_DB_AVAILABLE = True
 except ImportError:
     REVIEW_DB_AVAILABLE = False
@@ -503,4 +503,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
