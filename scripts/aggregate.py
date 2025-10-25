@@ -92,7 +92,7 @@ def aggregate_data():
     print(f"  📊 Tools: {len(tools)} entries")`n    print(f"  💰 Bounties: {len(bounties)} entries")
     
     # Combine all
-    all_entries = official + community + tools + bounties
+    all_entries = official + community + tools + bounties + nostr
     
     # Deduplicate by URL
     unique_entries = list({e['url']: e for e in all_entries}.values())
