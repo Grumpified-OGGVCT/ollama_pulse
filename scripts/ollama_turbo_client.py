@@ -24,10 +24,10 @@ class OllamaTurboClient:
     Ollama Cloud API Client optimized for Ollama ecosystem monitoring
 
     Works in GitHub Actions and locally
-    Uses Ollama Cloud API (https://api.ollama.ai)
+    Uses Ollama Cloud API (https://cloud.ollama.ai)
     """
 
-    def __init__(self, api_key: Optional[str] = None, base_url: str = "https://api.ollama.ai"):
+    def __init__(self, api_key: Optional[str] = None, base_url: str = "https://cloud.ollama.ai"):
         self.api_key = api_key or os.getenv("OLLAMA_API_KEY") or os.getenv("OLLAMA_TURBO_CLOUD_API_KEY") or os.getenv("OLLAMA_TURBO_CLOUD_API_KEY_1") or os.getenv("OLLAMA_TURBO_CLOUD_API_KEY_2")
         self.base_url = base_url
         self.session: Optional[aiohttp.ClientSession] = None
