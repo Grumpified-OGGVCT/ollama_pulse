@@ -28,56 +28,56 @@ def check_api_key() -> Tuple[bool, str]:
     return True, f"✅ OLLAMA_API_KEY found ({len(api_key)} chars)"
 
 
-def check_api_models(api_key: str, base_url: str = "https://cloud.ollama.ai") -> Tuple[bool, str]:
-    """Test GET /v1/models endpoint (OpenAI-compatible)"""
+def check_api_tags(api_key: str, base_url: str = "https://ollama.com") -> Tuple[bool, str]:
+    """Test GET /api/tags endpoint"""
     try:
         response = requests.get(
-            f"{base_url}/v1/models",
+            f"{base_url}/api/tags",
             headers={"Authorization": f"Bearer {api_key}"},
             timeout=10
         )
 
         if response.status_code == 200:
             data = response.json()
-            models = data.get("data", [])
-            return True, f"✅ GET /v1/models successful ({len(models)} models available)"
+            models = data.get("models", [])
+            return True, f"✅ GET /api/tags successful ({len(models)} models available)"
         else:
-            return False, f"❌ GET /v1/models failed: HTTP {response.status_code}"
+            return False, f"❌ GET /api/tags failed: HTTP {response.status_code}"
 
     except requests.exceptions.Timeout:
-        return False, "❌ GET /v1/models timeout (>10s)"
+        return False, "❌ GET /api/tags timeout (>10s)"
     except Exception as e:
-        return False, f"❌ GET /v1/models error: {str(e)}"
+        return False, f"❌ GET /api/tags error: {str(e)}"
 
 
-def check_api_chat(api_key: str, base_url: str = "https://cloud.ollama.ai") -> Tuple[bool, str]:
-    """Test POST /v1/chat/completions endpoint (OpenAI-compatible)"""
+def check_api_chat(api_key: str, base_url: str = "https://ollama.com") -> Tuple[bool, str]:
+    """Test POST /api/chat endpoint"""
     try:
         response = requests.post(
-            f"{base_url}/v1/chat/completions",
+            f"{base_url}/api/chat",
             headers={
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json"
             },
             json={
-                "model": "gpt-oss:20b-cloud",
+                "model": "gpt-oss:20b",
                 "messages": [{"role": "user", "content": "ping"}],
-                "max_tokens": 10
+                "stream": False
             },
             timeout=30
         )
 
         if response.status_code == 200:
             data = response.json()
-            message = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-            return True, f"✅ POST /v1/chat/completions successful (response: {len(message)} chars)"
+            message = data.get("message", {}).get("content", "")
+            return True, f"✅ POST /api/chat successful (response: {len(message)} chars)"
         else:
-            return False, f"❌ POST /v1/chat/completions failed: HTTP {response.status_code}"
+            return False, f"❌ POST /api/chat failed: HTTP {response.status_code}"
 
     except requests.exceptions.Timeout:
-        return False, "❌ POST /v1/chat/completions timeout (>30s)"
+        return False, "❌ POST /api/chat timeout (>30s)"
     except Exception as e:
-        return False, f"❌ POST /v1/chat/completions error: {str(e)}"
+        return False, f"❌ POST /api/chat error: {str(e)}"
 
 
 def main():
@@ -100,14 +100,14 @@ def main():
         os.getenv("OLLAMA_TURBO_CLOUD_API_KEY_2")
     )
     
-    # Check 2: /v1/models
-    success, message = check_api_models(api_key)
-    print(f"\n2. API Models Check: {message}")
+    # Check 2: /api/tags
+    success, message = check_api_tags(api_key)
+    print(f"\n2. API Tags Check: {message}")
     if not success:
-        print("\n💥 Smoke check FAILED - API models endpoint unreachable")
+        print("\n💥 Smoke check FAILED - API tags endpoint unreachable")
         sys.exit(1)
 
-    # Check 3: /v1/chat/completions
+    # Check 3: /api/chat
     success, message = check_api_chat(api_key)
     print(f"\n3. API Chat Check: {message}")
     if not success:
