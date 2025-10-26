@@ -34,7 +34,7 @@ jobs:
         run: |
           python scripts/ci_smoke_check.py
 
-      - name: Run ingestion (all 10 sources)
+      - name: Run ingestion (all 16 sources)
         env:
           OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
         run: |
@@ -45,6 +45,12 @@ jobs:
           python scripts/ingest_tools.py
           python scripts/ingest_bounties.py
           python scripts/ingest_nostr.py
+          python scripts/ingest_stackoverflow.py
+          python scripts/ingest_model_registry.py
+          python scripts/ingest_releases.py
+          python scripts/ingest_devblogs.py
+          python scripts/ingest_discord.py
+          python scripts/ingest_manual.py
 
       - name: Aggregate data
         env:

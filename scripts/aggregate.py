@@ -80,23 +80,38 @@ def filter_by_relevance(entries, threshold=0.3):
 
 def aggregate_data():
     """Aggregate data from all sources with Turbo-centric filtering"""
-    print("🔄 Aggregating data from all sources...")
-    
-    # Load from all sources
+    print("🔄 Aggregating data from all 16 sources...")
+
+    # Load from all sources (original 10)
     official = load_source_data("official")
     community = load_source_data("community")
     tools = load_source_data("tools")
     bounties = load_source_data("bounties")
     nostr = load_source_data("nostr")
 
+    # Load from new sources (5 new)
+    stackoverflow = load_source_data("stackoverflow")
+    models = load_source_data("models")
+    releases = load_source_data("releases")
+    devblogs = load_source_data("devblogs")
+    discord = load_source_data("discord")
+    manual = load_source_data("manual")
+
     print(f"  📊 Official: {len(official)} entries")
     print(f"  📊 Community: {len(community)} entries")
     print(f"  📊 Tools: {len(tools)} entries")
     print(f"  💰 Bounties: {len(bounties)} entries")
     print(f"  🌐 Nostr: {len(nostr)} entries")
+    print(f"  💬 Stack Overflow: {len(stackoverflow)} entries")
+    print(f"  🤖 Model Registry: {len(models)} entries")
+    print(f"  📦 Releases: {len(releases)} entries")
+    print(f"  📝 Dev Blogs: {len(devblogs)} entries")
+    print(f"  🎮 Discord: {len(discord)} entries")
+    print(f"  ⭐ Manual Tracking: {len(manual)} entries")
 
     # Combine all
-    all_entries = official + community + tools + bounties + nostr
+    all_entries = (official + community + tools + bounties + nostr +
+                   stackoverflow + models + releases + devblogs + discord + manual)
     
     # Deduplicate by URL
     unique_entries = list({e['url']: e for e in all_entries}.values())

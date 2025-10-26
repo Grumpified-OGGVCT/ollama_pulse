@@ -1,0 +1,282 @@
+[
+  {
+    "title": "Ollama v0.12.6: v0.12.6",
+    "date": "2025-10-15T23:02:31Z",
+    "summary": "## What's Changed\r\n* Ollama's app now supports searching when running DeepSeek-V3.1, Qwen3 and other models that support tool calling.\r\n* Flash attention is now enabled by default for Gemma 3, improving performance and memory utilization\r\n* Fixed issue where Ollama would hang while generating responses\r\n* Fixed issue where `qwen3-coder` would act in raw mode when using `/api/generate` or `ollama run qwen3-coder <prompt>`\r\n* Fixed `qwen3-embedding` providing invalid results\r\n* Ollama will now evi",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.12.6",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.12.6",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.12.5: v0.12.5",
+    "date": "2025-10-10T16:30:53Z",
+    "summary": "## What's Changed\r\n* Thinking models now support structured outputs when using the `/api/chat` API\r\n* Ollama's app will now wait until Ollama is running to allow for a conversation to be started\r\n* Fixed issue where `\"think\": false` would show an error instead of being silently ignored\r\n* Fixed `deepseek-r1` output issues\r\n* macOS 12 Monterey and macOS 13 Ventura are no longer supported\r\n* AMD gfx900 and gfx906 (MI50, MI60, etc) GPUs are no longer supported via ROCm. We're working to support the",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.12.5",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.12.5",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.12.4: v0.12.4",
+    "date": "2025-10-03T16:38:12Z",
+    "summary": "## What's Changed\r\n* Flash attention is now enabled by default for Qwen 3 and Qwen 3 Coder\r\n* Fixed minor memory estimation issues when scheduling models on NVIDIA GPUs\r\n* Fixed an issue where `keep_alive` in the API would accept different values for the `/api/chat` and `/api/generate` endpoints\r\n* Fixed tool calling rendering with `qwen3-coder`\r\n* More reliable and accurate VRAM detection\r\n* `OLLAMA_FLASH_ATTENTION` can now be overridden to `0` for models that have flash attention enabled by de",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.12.4",
+    "source": "ollama_releases",
+    "turbo_score": 0.6,
+    "highlights": [
+      "version: v0.12.4",
+      "prerelease: True",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.12.3: v0.12.3",
+    "date": "2025-09-26T05:08:26Z",
+    "summary": "## New models\r\n\r\n- [DeepSeek-V3.1-Terminus](https://ollama.com/library/deepseek-v3.1): DeepSeek-V3.1-Terminus is a hybrid model that supports both thinking mode and non-thinking mode. It delivers more stable & reliable outputs across benchmarks compared to the previous version:\r\n\r\n  Run on [Ollama's cloud](https://ollama.com/cloud):\r\n  \r\n  ```\r\n  ollama run deepseek-v3.1:671b-cloud\r\n  ```\r\n  \r\n  Run locally (requires 500GB+ of VRAM)\r\n  \r\n  ```\r\n  ollama run deepseek-v3.1\r\n  ```\r\n\r\n- [Kimi-K2-Ins",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.12.3",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.12.3",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.12.2: v0.12.2",
+    "date": "2025-09-24T21:19:20Z",
+    "summary": "## Web search\r\n\r\n<img width=\"512\" alt=\"ollama_web_search\" src=\"https://github.com/user-attachments/assets/fc49a8bc-7a3f-462c-901c-5a9625c082c3\" />\r\n\r\n[A new web search API](https://ollama.com/blog/web-search) is now available in Ollama. Ollama provides a generous free tier of web searches for individuals to use, and higher rate limits are available via [Ollama’s cloud](https://ollama.com/cloud). This web search capability can augment models with the latest information from the web to reduce hall",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.12.2",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.12.2",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.12.1: v0.12.1",
+    "date": "2025-09-21T23:19:05Z",
+    "summary": "## New models\r\n- [Qwen3 Embedding](https://ollama.com/library/qwen3-embedding): state of the art open embedding model by the Qwen team\r\n\r\n## What's Changed\r\n* Qwen3-Coder now supports tool calling\r\n* Ollama's app will now longer show \"connection lost\" in error when connecting to cloud models\r\n* Fixed issue where Gemma3 QAT models would not output correct tokens\r\n* Fix issue where `&` characters in Qwen3-Coder would not be parsed correctly when function calling\r\n* Fixed issues where `ollama signi",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.12.1",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.12.1",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.12.0: v0.12.0",
+    "date": "2025-09-18T17:29:57Z",
+    "summary": "## Cloud models\r\n\r\n<img width=\"512\" alt=\"Ollama_cloud_background\" src=\"https://github.com/user-attachments/assets/7f36e60c-dd33-4eac-babd-a2b7df89bc2f\" />\r\n\r\n[Cloud models](https://ollama.com/blog/cloud-models) are now available in preview, allowing you to run a group of larger models with fast, datacenter-grade hardware.\r\n\r\nTo run a cloud model, use:\r\n\r\n```\r\nollama run qwen3-coder:480b-cloud\r\n```\r\n\r\n* [View all](https://ollama.com/search?c=cloud) cloud models\r\n* [Blog post](https://ollama.com/b",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.12.0",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.12.0",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.11.11: v0.11.11",
+    "date": "2025-09-11T21:02:41Z",
+    "summary": "## What's Changed\r\n* Support for CUDA 13\r\n* Improved memory usage when using gpt-oss in Ollama's app\r\n* Better scrolling better in Ollama's app when submitting long prompts\r\n* Cmd +/- will now zoom and shrink text in Ollama's app\r\n* Assistant messages can now by copied in Ollama's app\r\n* Fixed error that would occur when attempting to import satefensor files  by @rick-github in https://github.com/ollama/ollama/pull/12176\r\n* Improved memory estimates for hybrid and recurrent models by @gabe-l-har",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.11.11",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.11.11",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.11.10: v0.11.10",
+    "date": "2025-09-04T17:27:40Z",
+    "summary": "## New models\r\n- [EmbeddingGemma](https://ollama.com/library/embeddinggemma) a new open embedding model that delivers best-in-class performance for its size\r\n\r\n## What's Changed\r\n* Support for EmbeddingGemma\r\n\r\n**Full Changelog**: https://github.com/ollama/ollama/compare/v0.11.9...v0.11.10",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.11.10",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.11.10",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.11.9: v0.11.9",
+    "date": "2025-09-02T20:14:18Z",
+    "summary": "## What's Changed\r\n* Improved performance via overlapping GPU and CPU computations\r\n* Fixed issues where unrecognized AMD GPU would cause an error\r\n* Reduce crashes due to unhandled errors in some Mac and Linux installations of Ollama\r\n\r\n## New Contributors\r\n* @alpha-nerd-nomyo made their first contribution in https://github.com/ollama/ollama/pull/12129\r\n* @pxwanglu made their first contribution in https://github.com/ollama/ollama/pull/12123\r\n\r\n**Full Changelog**: https://github.com/ollama/ollam",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.11.9",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.11.9",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.11.8: v0.11.8",
+    "date": "2025-08-27T18:43:44Z",
+    "summary": "## What's Changed\r\n* `gpt-oss` now has flash attention enabled by default for systems that support it\r\n* Improved load times for `gpt-oss`\r\n\r\n**Full Changelog**: https://github.com/ollama/ollama/compare/v0.11.7...v0.11.8",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.11.8",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.11.8",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.11.7: v0.11.7",
+    "date": "2025-08-25T18:04:05Z",
+    "summary": "## DeepSeek-V3.1\r\n\r\n[DeepSeek-V3.1](https://ollama.com/library/deepseek-v3.1) is now available to run via Ollama.\r\n\r\nThis model supports hybrid thinking, meaning thinking can be enabled or disabled by setting `think` in Ollama's API:\r\n\r\n```\r\ncurl http://localhost:11434/api/chat -d '{\r\n  \"model\": \"deepseek-v3.1\",\r\n  \"messages\": [\r\n    {\r\n      \"role\": \"user\",\r\n      \"content\": \"why is the sky blue?\"\r\n    }\r\n  ],\r\n  \"think\": true\r\n}'\r\n\r\n```\r\n\r\nIn Ollama's CLI, thinking can be enabled or disabled b",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.11.7",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.11.7",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.11.6: v0.11.6",
+    "date": "2025-08-20T21:00:13Z",
+    "summary": "## What's Changed\r\n* Ollama's app will now switch between chats faster\r\n* Improved layout of messages in Ollama's app\r\n* Fixed issue where command prompt would show when Ollama's app detected an old version of Ollama running\r\n* Improved performance when using flash attention\r\n* Fixed boundary case when encoding text using BPE\r\n\r\n**Full Changelog**: https://github.com/ollama/ollama/compare/v0.11.5...v0.11.6\r\n",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.11.6",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.11.6",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.11.5: v0.11.5",
+    "date": "2025-08-15T02:38:31Z",
+    "summary": "## What's Changed\r\n* Performance improvements for the `gpt-oss` models\r\n* New memory management: this release of Ollama includes improved memory management for scheduling models on GPUs, leading to better VRAM utilization, model performance and less out of memory errors. These new memory estimations can be enabled with `OLLAMA_NEW_ESTIMATES=1 ollama serve` and will soon be enabled by default.\r\n* Improved multi-GPU scheduling and reduced VRAM allocation when using more than 2 GPUs\r\n* Ollama's new",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.11.5",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.11.5",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.11.4: v0.11.4",
+    "date": "2025-08-07T17:17:41Z",
+    "summary": "## What's Changed\r\n* openai: allow for content _and_ tool calls in the same message by @drifkin in https://github.com/ollama/ollama/pull/11759\r\n* openai: when converting role=tool messages, propagate the tool name by @drifkin in https://github.com/ollama/ollama/pull/11761\r\n* openai: always provide reasoning by @drifkin in https://github.com/ollama/ollama/pull/11765\r\n\r\n## New Contributors\r\n* @gao-feng made their first contribution in https://github.com/ollama/ollama/pull/11170\r\n\r\n**Full Changelog",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.11.4",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.11.4",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.11.3: v0.11.3",
+    "date": "2025-08-06T01:29:59Z",
+    "summary": "## What's Changed\r\n* Fixed issue where `gpt-oss` would consume too much VRAM when split across GPU & CPU or multiple GPUs\r\n* Statically link C++ libraries on windows for better compatibility\r\n\r\n**Full Changelog**: https://github.com/ollama/ollama/compare/v0.11.2...v0.11.3\r\n",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.11.3",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.11.3",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.11.2: v0.11.2",
+    "date": "2025-08-05T21:18:07Z",
+    "summary": "## What's Changed\r\n* Fix crash in gpt-oss when using kv cache quanitization\r\n* Fix gpt-oss bug with \"currentDate\" not defined\r\n\r\n**Full Changelog**: https://github.com/ollama/ollama/compare/v0.11.1...v0.11.2",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.11.2",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.11.2",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.11.0: v0.11.0",
+    "date": "2025-08-05T16:56:24Z",
+    "summary": "<img alt=\"ollama OpenAI gpt-oss\" src=\"https://github.com/user-attachments/assets/7f8f75ec-f712-4daa-b5d9-959bf1032384\" />\r\n\r\n## Welcome OpenAI's gpt-oss models \r\n\r\nOllama partners with OpenAI to bring its latest state-of-the-art open weight models to Ollama. The two models, 20B and 120B, bring a whole new local chat experience, and are designed for powerful reasoning, agentic tasks, and versatile developer use cases. \r\n\r\n### Feature highlights \r\n\r\n- **Agentic capabilities:** Use the models’ nati",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.11.0",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.11.0",
+      "prerelease: False",
+      "assets: 13",
+      "author: dhiltgen"
+    ]
+  },
+  {
+    "title": "Ollama v0.10.1: v0.10.1",
+    "date": "2025-07-31T04:39:49Z",
+    "summary": "## What's Changed\r\n* Fixed unicode character input for Japanese and other languages in Ollama's new app\r\n* Fixed AMD download URL in the logs for `ollama serve`\r\n\r\n## New Contributors\r\n* @skools-here made their first contribution in https://github.com/ollama/ollama/pull/11579\r\n\r\n**Full Changelog**: https://github.com/ollama/ollama/compare/v0.10.0...v0.10.1",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.10.1",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.10.1",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  },
+  {
+    "title": "Ollama v0.10.0: v0.10.0",
+    "date": "2025-07-18T00:23:58Z",
+    "summary": "## Ollama's new app\r\n\r\nOllama's new app is available for macOS and Windows: [Download Ollama](https://ollama.com/download)\r\n\r\n<img alt=\"ollama's new app\" src=\"https://github.com/user-attachments/assets/d99a2830-58d9-413c-b54c-db1fb95416b8\" />\r\n\r\n## What's Changed\r\n* `ollama ps` will now show the context length of loaded models\r\n* Improved performance in `gemma3n` models by 2-3x\r\n* Parallel request processing now defaults to 1. For more details, see the [FAQ](https://github.com/ollama/ollama/blob",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.10.0",
+    "source": "ollama_releases",
+    "turbo_score": 0.9,
+    "highlights": [
+      "version: v0.10.0",
+      "prerelease: False",
+      "assets: 13",
+      "author: github-actions[bot]"
+    ]
+  }
+]
