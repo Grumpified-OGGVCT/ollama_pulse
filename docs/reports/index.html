@@ -152,9 +152,10 @@ title: Reports Archive - Ollama Pulse
 (function() {
   // Get all reports from the reports directory
   const reports = [
-    { date: '2025-10-24', title: 'Pulse 2025-10-24', url: '/ollama_pulse/reports/pulse-2025-10-24.html' },
-    { date: '2025-10-23', title: 'Pulse 2025-10-23', url: '/ollama_pulse/reports/pulse-2025-10-23.html' },
-    { date: '2025-10-22', title: 'Pulse 2025-10-22', url: '/ollama_pulse/reports/pulse-2025-10-22.html' }
+    { date: '2025-10-25', title: 'Pulse 2025-10-25', url: '/ollama_pulse/reports/pulse-2025-10-25' },
+    { date: '2025-10-24', title: 'Pulse 2025-10-24', url: '/ollama_pulse/reports/pulse-2025-10-24' },
+    { date: '2025-10-23', title: 'Pulse 2025-10-23', url: '/ollama_pulse/reports/pulse-2025-10-23' },
+    { date: '2025-10-22', title: 'Pulse 2025-10-22', url: '/ollama_pulse/reports/pulse-2025-10-22' }
   ];
 
   const listView = document.getElementById('listView');
@@ -165,23 +166,23 @@ title: Reports Archive - Ollama Pulse
   const sortOrder = document.getElementById('sortOrder');
 
   function renderListView(filteredReports) {
-    listView.innerHTML = filteredReports.map(report => 
+    listView.innerHTML = filteredReports.map(report => `
       <div class="report-item">
-        <h3><a href="+${report.url}+" style="color: #60a5fa; text-decoration: none;">+${report.title}+</a></h3>
-        <div class="meta">📅 +${report.date}+</div>
+        <h3><a href="${report.url}" style="color: #60a5fa; text-decoration: none;">${report.title}</a></h3>
+        <div class="meta">📅 ${report.date}</div>
         <div class="excerpt">Ollama ecosystem discoveries and insights</div>
-        <a href="+${report.url}+" style="color: #60a5fa;">Read full report →</a>
+        <a href="${report.url}" style="color: #60a5fa;">Read full report →</a>
       </div>
-    ).join('');
+    `).join('');
   }
 
   function renderCalendarView(filteredReports) {
-    calendarView.innerHTML = filteredReports.map(report => 
-      <div class="calendar-day has-report" onclick="window.location.href='+${report.url}+'">
-        <div class="date">+${report.date.split('-')[2]}+</div>
-        <div class="count">+${report.date}+</div>
+    calendarView.innerHTML = filteredReports.map(report => `
+      <div class="calendar-day has-report" onclick="window.location.href='${report.url}'">
+        <div class="date">${report.date.split('-')[2]}</div>
+        <div class="count">${report.date}</div>
       </div>
-    ).join('');
+    `).join('');
   }
 
   function filterAndSort() {
