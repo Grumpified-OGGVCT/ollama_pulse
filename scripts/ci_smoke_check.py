@@ -28,7 +28,7 @@ def check_api_key() -> Tuple[bool, str]:
     return True, f"✅ OLLAMA_API_KEY found ({len(api_key)} chars)"
 
 
-def check_api_tags(api_key: str, base_url: str = "https://api.ollama.ai") -> Tuple[bool, str]:
+def check_api_tags(api_key: str, base_url: str = "https://api.ollama.com") -> Tuple[bool, str]:
     """Test GET /api/tags endpoint"""
     try:
         response = requests.get(
@@ -36,21 +36,21 @@ def check_api_tags(api_key: str, base_url: str = "https://api.ollama.ai") -> Tup
             headers={"Authorization": f"Bearer {api_key}"},
             timeout=10
         )
-        
+
         if response.status_code == 200:
             data = response.json()
             models = data.get("models", [])
             return True, f"✅ GET /api/tags successful ({len(models)} models available)"
         else:
             return False, f"❌ GET /api/tags failed: HTTP {response.status_code}"
-            
+
     except requests.exceptions.Timeout:
         return False, "❌ GET /api/tags timeout (>10s)"
     except Exception as e:
         return False, f"❌ GET /api/tags error: {str(e)}"
 
 
-def check_api_chat(api_key: str, base_url: str = "https://api.ollama.ai") -> Tuple[bool, str]:
+def check_api_chat(api_key: str, base_url: str = "https://api.ollama.com") -> Tuple[bool, str]:
     """Test POST /api/chat endpoint with simple message"""
     try:
         response = requests.post(
