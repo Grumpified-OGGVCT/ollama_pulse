@@ -201,11 +201,11 @@ If Ollama Pulse helps you stay ahead of the ecosystem, consider supporting devel
 
 **Ko-fi (Fiat/Card):**
 - Link: https://ko-fi.com/grumpified
-- QR Code: ![Ko-fi QR](assets/kofi-qr.png)
+- QR Code: ![Ko-fi QR](assets/KofiTipQR_Code_GrumpiFied.png)
 
 **Lightning Network (Bitcoin):**
 - Address: `lnbc1...` (see QR code)
-- QR Code: ![Lightning QR](assets/lightning-qr.png)
+- QR Code: ![Lightning QR](assets/lightning_wallet_QR_Code.png)
 
 **Why Support?**
 - Keeps the project maintained and updated

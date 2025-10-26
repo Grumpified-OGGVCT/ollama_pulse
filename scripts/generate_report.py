@@ -291,6 +291,39 @@ def generate_report_md(aggregated, insights, historical_context=None):
     # Add the developer-focused section
     report += build_dev_section(aggregated, insights)
 
+    # Add bounty section if available
+    try:
+        bounty_content = render_bounty_section()
+        if bounty_content and "No bounty pulses" not in bounty_content:
+            report += "\n---\n\n"
+            report += bounty_content
+    except Exception as e:
+        print(f"⚠️  Bounty section error: {e}")
+
+    # Add Nostr section
+    report += "\n---\n\n## 🌐 Nostr Veins: Decentralized Pulse\n\n"
+    today = get_today_date_str()
+    nostr_file = f"../data/nostr/{today}.json"
+    if os.path.exists(nostr_file):
+        with open(nostr_file, 'r', encoding='utf-8') as f:
+            nostr_data = json.load(f)
+            if nostr_data:
+                report += f"**{len(nostr_data)} Nostr articles** detected on the decentralized network:\n\n"
+                report += "| Article | Author | Turbo Score | Read |\n"
+                report += "|---------|--------|-------------|------|\n"
+                for item in nostr_data[:5]:
+                    title = item.get('title', 'Untitled')[:50]
+                    author = item.get('author', 'Unknown')[:20]
+                    score = item.get('turbo_score', 0)
+                    score_emoji = "🔥" if score >= 0.7 else "⚡" if score >= 0.5 else "💡"
+                    url = item.get('url', '#')
+                    report += f"| {title} | {author} | {score_emoji} {score:.1f} | [📖]({url}) |\n"
+                report += f"\n*This report auto-published to Nostr via NIP-23 at 4 PM CT*\n"
+            else:
+                report += "*No Nostr veins detected today — but the network never sleeps.*\n"
+    else:
+        report += "*No Nostr veins detected today — but the network never sleeps.*\n"
+
     report += "\n---\n\n## 🔮 About EchoVein & This Vein Map\n\n"
     report += "**EchoVein** is your underground cartographer — the vein-tapping oracle who doesn't just "
     report += "pulse with news but *excavates the hidden arteries* of Ollama innovation. Razor-sharp curiosity "
@@ -320,6 +353,40 @@ def generate_report_md(aggregated, insights, historical_context=None):
     report += "- **Source Code**: [github.com/Grumpified-OGGVCT/ollama_pulse](https://github.com/Grumpified-OGGVCT/ollama_pulse)\n"
     report += "- **Powered by**: GitHub Actions, Multi-Source Ingestion, ML Pattern Detection\n"
     report += "- **Updated**: Hourly ingestion, Daily 4PM CT reports\n\n"
+
+    # Add Lingo Legend
+    report += "\n---\n\n## 🩸 EchoVein Lingo Legend\n\n"
+    report += "Decode the vein-tapping oracle's unique terminology:\n\n"
+    report += "| Term | Meaning |\n"
+    report += "|------|----------|\n"
+    report += "| **Vein** | A signal, trend, or data point |\n"
+    report += "| **Ore** | Raw data items collected |\n"
+    report += "| **High-Purity Vein** | Turbo-relevant item (score ≥0.7) |\n"
+    report += "| **Vein Rush** | High-density pattern surge |\n"
+    report += "| **Artery Audit** | Steady maintenance updates |\n"
+    report += "| **Fork Phantom** | Niche experimental projects |\n"
+    report += "| **Deep Vein Throb** | Slow-day aggregated trends |\n"
+    report += "| **Vein Bulging** | Emerging pattern (≥5 items) |\n"
+    report += "| **Vein Oracle** | Prophetic inference |\n"
+    report += "| **Vein Prophecy** | Predicted trend direction |\n"
+    report += "| **Confidence Vein** | HIGH (🩸), MEDIUM (⚡), LOW (🤖) |\n"
+    report += "| **Vein Yield** | Quality ratio metric |\n"
+    report += "| **Vein-Tapping** | Mining/extracting insights |\n"
+    report += "| **Artery** | Major trend pathway |\n"
+    report += "| **Vein Strike** | Significant discovery |\n"
+    report += "| **Throbbing Vein** | High-confidence signal |\n"
+    report += "| **Vein Map** | Daily report structure |\n"
+    report += "| **Dig In** | Link to source/details |\n\n"
+
+    # Add donation section with QR codes
+    report += "\n---\n\n## 💰 Support the Vein Network\n\n"
+    report += "If Ollama Pulse helps you stay ahead of the ecosystem, consider supporting development:\n\n"
+    report += "**Ko-fi (Fiat/Card):** https://ko-fi.com/grumpified\n\n"
+    report += "![Ko-fi QR](../assets/KofiTipQR_Code_GrumpiFied.png)\n\n"
+    report += "**Lightning Network (Bitcoin):**\n\n"
+    report += "![Lightning QR](../assets/lightning_wallet_QR_Code.png)\n\n"
+    report += "*All donations support open-source AI tooling and ecosystem monitoring.*\n\n"
+
     report += "*Built by vein-tappers, for vein-tappers. Dig deeper. Ship harder.* ⛏️🩸\n"
 
     return report
