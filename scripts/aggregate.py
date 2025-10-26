@@ -24,12 +24,25 @@ def load_source_data(source_dir):
     """Load today's data from a source directory"""
     today = datetime.now().strftime("%Y-%m-%d")
     filename = f"data/{source_dir}/{today}.json"
-    
+
     if not os.path.exists(filename):
         return []
-    
+
     with open(filename, 'r') as f:
-        return json.load(f)
+        data = json.load(f)
+
+        # Ensure we always return a list
+        if isinstance(data, dict):
+            # If it's a dict, check if it has an 'entries' key
+            if 'entries' in data:
+                return data['entries']
+            # Otherwise, wrap it in a list
+            return [data]
+        elif isinstance(data, list):
+            return data
+        else:
+            # Unknown type, return empty list
+            return []
 
 
 def score_turbo_relevance(entry):
