@@ -10,13 +10,24 @@ This script:
 4. Handles both Ollama Pulse and AI Research Daily formats
 """
 import json
+import os
 import re
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 import frontmatter
 
-from review_database import ReviewDatabase, ProjectReview
+# Try Supabase first, fallback to SQLite
+try:
+    if os.getenv('SUPABASE_URL') and os.getenv('SUPABASE_KEY'):
+        from supabase_database import SupabaseReviewDatabase as ReviewDatabase, ProjectReview
+        print("✅ Using Supabase PostgreSQL database")
+    else:
+        raise ImportError("Supabase credentials not found")
+except (ImportError, Exception) as e:
+    print(f"⚠️  Supabase unavailable, using SQLite: {e}")
+    from review_database import ReviewDatabase, ProjectReview
+
 from review_integration import ReviewIntegration
 
 

@@ -2,13 +2,19 @@
 """
 Ollama Pulse - Cloud Sources Deep Ingestion
 Polls Ollama Cloud API endpoints for Turbo model details and changelogs
+
+PRIMARY: Uses Ollama web_search API for cloud model discovery
+FALLBACK: Direct scraping if web_search fails
 """
+import asyncio
 import json
 import os
 from datetime import datetime
 from pathlib import Path
 
 import requests
+
+from ollama_turbo_client import OllamaTurboClient
 
 
 def ensure_data_dir():
@@ -116,27 +122,61 @@ def save_data(entries):
     print(f"💾 Saved {len(unique_entries)} entries to {filename}")
 
 
+async def fetch_via_web_search(filter_type="turbo"):
+    """
+    PRIMARY: Use Ollama web_search API for cloud model discovery
+    """
+    print(f"🔍 PRIMARY: Using Ollama web_search for cloud models (filter={filter_type})...")
+
+    try:
+        async with OllamaTurboClient() as client:
+            # Search for Ollama cloud models
+            query = "Ollama Cloud models, Turbo API, cloud-hosted models" if filter_type == "turbo" else "All Ollama models and library"
+            results = await client.discover_ecosystem_content(
+                query=query,
+                content_type="tools",
+                max_results=30
+            )
+
+            print(f"✅ Web search found {len(results)} cloud models")
+            return results
+
+    except Exception as e:
+        print(f"⚠️  Web search failed: {e}")
+        print("   Falling back to direct scraping...")
+        return []
+
+
 def main():
     """Main ingestion function"""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description='Ollama Cloud Deep Ingestion')
     parser.add_argument('--filter', default='turbo', choices=['turbo', 'all'],
                        help='Filter models by type (default: turbo)')
     parser.add_argument('--depth', default='full', choices=['full', 'basic'],
                        help='Depth of information to fetch (default: full)')
-    
+
     args = parser.parse_args()
-    
+
     print("🚀 Starting cloud sources deep ingestion...")
     ensure_data_dir()
-    
-    # Fetch cloud models with specified filters
-    cloud_entries = fetch_ollama_tags(filter_type=args.filter, depth=args.depth)
-    
+
+    # PRIMARY: Try Ollama web_search first
+    web_search_entries = asyncio.run(fetch_via_web_search(filter_type=args.filter))
+
+    # FALLBACK: Use direct scraping if web_search failed or returned few results
+    if len(web_search_entries) < 5:
+        print("📡 FALLBACK: Using direct scraping...")
+        cloud_entries = fetch_ollama_tags(filter_type=args.filter, depth=args.depth)
+        all_entries = web_search_entries + cloud_entries
+    else:
+        print("✅ Web search provided sufficient results, skipping fallback")
+        all_entries = web_search_entries
+
     # Save
-    save_data(cloud_entries)
-    
+    save_data(all_entries)
+
     print("✅ Cloud sources ingestion complete!")
 
 

@@ -2,13 +2,20 @@
 """
 Ollama Pulse - Community Sources Ingestion
 Polls X/Twitter, Reddit, Product Hunt for community activity
+
+PRIMARY: Uses Ollama web_search API for intelligent discovery
+FALLBACK: Direct API calls if web_search fails
 """
+import asyncio
 import json
 import os
 from datetime import datetime
 from pathlib import Path
 
 import requests
+
+from searxng_client import OllamaWebSearchClient
+from ollama_turbo_client import OllamaTurboClient
 
 
 def ensure_data_dir():
@@ -33,7 +40,7 @@ def fetch_reddit():
         )
         response.raise_for_status()
         data = response.json()
-        
+
         entries = []
         for post in data['data']['children'][:20]:  # Last 20 posts
             post_data = post['data']
@@ -45,7 +52,7 @@ def fetch_reddit():
                 "source": "reddit",
                 "highlights": [f"upvotes: {post_data['ups']}"]
             })
-        
+
         print(f"✅ Found {len(entries)} Reddit posts")
         return entries
     except Exception as e:
@@ -73,18 +80,18 @@ def fetch_youtube_transcripts():
     """Fetch YouTube videos about Ollama Turbo Cloud"""
     print("📡 Fetching YouTube videos...")
     entries = []
-    
+
     try:
         # Use YouTube RSS feed (no API key required)
         # Search for Ollama channel or specific queries
         import feedparser
-        
+
         # Try Ollama-related search results via RSS (limited but free)
         # Note: Full implementation would use yt-dlp for transcripts
         feed_url = "https://www.youtube.com/feeds/videos.xml?q=ollama+turbo+cloud"
-        
+
         feed = feedparser.parse(feed_url)
-        
+
         for entry in feed.entries[:5]:  # Last 5 videos
             video_entry = {
                 "title": f"[Video] {entry.title}",
@@ -95,12 +102,12 @@ def fetch_youtube_transcripts():
                 "highlights": ["video tutorial", "ollama tutorial"]
             }
             entries.append(video_entry)
-        
+
         print(f"✅ Found {len(entries)} YouTube videos")
-        
+
     except Exception as e:
         print(f"⚠️  Could not fetch YouTube: {e}")
-    
+
     return entries
 
 
@@ -108,7 +115,7 @@ def fetch_hackernews():
     """Fetch Hacker News posts about Ollama"""
     print("📡 Fetching Hacker News...")
     entries = []
-    
+
     try:
         # Use Algolia HN Search API (free, no key needed)
         url = "https://hn.algolia.com/api/v1/search"
@@ -117,15 +124,15 @@ def fetch_hackernews():
             "tags": "story",
             "hitsPerPage": 20
         }
-        
+
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
         data = response.json()
-        
+
         for hit in data.get('hits', []):
             if not hit.get('url'):
                 continue
-            
+
             entry = {
                 "title": hit.get('title', 'No title'),
                 "date": hit.get('created_at', datetime.now().isoformat()),
@@ -135,12 +142,12 @@ def fetch_hackernews():
                 "highlights": [f"points: {hit.get('points', 0)}", f"comments: {hit.get('num_comments', 0)}"]
             }
             entries.append(entry)
-        
+
         print(f"✅ Found {len(entries)} Hacker News posts")
-        
+
     except Exception as e:
         print(f"⚠️  Could not fetch Hacker News: {e}")
-    
+
     return entries
 
 
@@ -148,7 +155,7 @@ def fetch_huggingface_discussions():
     """Fetch HuggingFace discussions about Ollama"""
     print("📡 Fetching HuggingFace discussions...")
     entries = []
-    
+
     try:
         # Use HuggingFace API to search discussions
         url = "https://huggingface.co/api/discussions"
@@ -156,13 +163,13 @@ def fetch_huggingface_discussions():
             "search": "ollama turbo",
             "limit": 20
         }
-        
+
         response = requests.get(url, params=params, timeout=10, headers={"User-Agent": "OllamaPulse/1.0"})
-        
+
         if response.status_code == 200:
             data = response.json()
             discussions = data if isinstance(data, list) else []
-            
+
             for discussion in discussions[:20]:
                 entry = {
                     "title": discussion.get('title', 'Discussion'),
@@ -173,12 +180,12 @@ def fetch_huggingface_discussions():
                     "highlights": ["model discussion", "huggingface"]
                 }
                 entries.append(entry)
-        
+
         print(f"✅ Found {len(entries)} HuggingFace discussions")
-        
+
     except Exception as e:
         print(f"⚠️  Could not fetch HuggingFace: {e}")
-    
+
     return entries
 
 
@@ -186,16 +193,16 @@ def fetch_newsletters():
     """Fetch newsletters about Ollama"""
     print("📡 Fetching newsletters...")
     entries = []
-    
+
     try:
         import feedparser
-        
+
         # Try common newsletter RSS feeds
         # Note: Adjust URLs based on actual newsletter sources
         newsletter_feeds = [
             "https://ollama.substack.com/feed",  # If exists
         ]
-        
+
         for feed_url in newsletter_feeds:
             try:
                 feed = feedparser.parse(feed_url)
@@ -211,12 +218,12 @@ def fetch_newsletters():
                     entries.append(newsletter_entry)
             except Exception as feed_err:
                 print(f"  ⚠️  Could not fetch {feed_url}: {feed_err}")
-        
+
         print(f"✅ Found {len(entries)} newsletter items")
-        
+
     except Exception as e:
         print(f"⚠️  Could not fetch newsletters: {e}")
-    
+
     return entries
 
 
@@ -225,45 +232,92 @@ def save_data(entries):
     if not entries:
         print("⚠️  No data to save")
         return
-    
+
     filename = get_today_filename()
-    
+
     # Load existing data if file exists
     existing = []
     if os.path.exists(filename):
         with open(filename, 'r') as f:
             existing = json.load(f)
-    
+
     # Merge and deduplicate by URL
     all_entries = existing + entries
     unique_entries = {e['url']: e for e in all_entries}.values()
-    
+
     # Save
     with open(filename, 'w') as f:
         json.dump(list(unique_entries), f, indent=2)
-    
+
     print(f"💾 Saved {len(unique_entries)} entries to {filename}")
+
+
+async def fetch_via_web_search():
+    """
+    PRIMARY: Use Ollama web_search API for intelligent discovery
+
+    This replaces direct API calls with AI-powered search that can find
+    content across ALL sources (Reddit, HN, YouTube, blogs, etc.)
+    """
+    print("🔍 PRIMARY: Using Ollama web_search for discovery...")
+
+    try:
+        async with OllamaTurboClient() as client:
+            # Search for community discussions
+            discussions = await client.discover_ecosystem_content(
+                query="Ollama community discussions, tutorials, and user experiences from Reddit, HackerNews, YouTube",
+                content_type="discussions",
+                max_results=30
+            )
+
+            # Search for tools and integrations
+            tools = await client.discover_ecosystem_content(
+                query="Ollama tools, integrations, and projects from GitHub, HuggingFace, and developer blogs",
+                content_type="tools",
+                max_results=20
+            )
+
+            # Combine results
+            all_results = discussions + tools
+
+            print(f"✅ Web search found {len(all_results)} items")
+            return all_results
+
+    except Exception as e:
+        print(f"⚠️  Web search failed: {e}")
+        print("   Falling back to direct API calls...")
+        return []
 
 
 def main():
     """Main ingestion function"""
     print("🚀 Starting community sources ingestion...")
     ensure_data_dir()
-    
-    # Fetch from all sources
-    reddit_entries = fetch_reddit()
-    twitter_entries = fetch_twitter_placeholder()
-    ph_entries = fetch_producthunt_placeholder()
-    youtube_entries = fetch_youtube_transcripts()
-    hn_entries = fetch_hackernews()
-    hf_entries = fetch_huggingface_discussions()
-    newsletter_entries = fetch_newsletters()
-    
-    # Combine and save
-    all_entries = (reddit_entries + twitter_entries + ph_entries + 
-                   youtube_entries + hn_entries + hf_entries + newsletter_entries)
+
+    # PRIMARY: Try Ollama web_search first
+    web_search_entries = asyncio.run(fetch_via_web_search())
+
+    # FALLBACK: Use direct API calls if web_search failed or returned few results
+    if len(web_search_entries) < 10:
+        print("📡 FALLBACK: Using direct API calls...")
+        reddit_entries = fetch_reddit()
+        twitter_entries = fetch_twitter_placeholder()
+        ph_entries = fetch_producthunt_placeholder()
+        youtube_entries = fetch_youtube_transcripts()
+        hn_entries = fetch_hackernews()
+        hf_entries = fetch_huggingface_discussions()
+        newsletter_entries = fetch_newsletters()
+
+        fallback_entries = (reddit_entries + twitter_entries + ph_entries +
+                           youtube_entries + hn_entries + hf_entries + newsletter_entries)
+
+        # Combine web_search + fallback
+        all_entries = web_search_entries + fallback_entries
+    else:
+        print("✅ Web search provided sufficient results, skipping fallback")
+        all_entries = web_search_entries
+
     save_data(all_entries)
-    
     print("✅ Community sources ingestion complete!")
 
 

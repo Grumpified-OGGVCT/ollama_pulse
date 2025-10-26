@@ -2,7 +2,11 @@
 """
 Ollama Pulse - GitHub Issues/PRs Ingestion
 Fetches GitHub issues and pull requests mentioning Ollama Turbo Cloud
+
+PRIMARY: Uses Ollama web_search API for issue discovery
+FALLBACK: Direct GitHub API if web_search fails
 """
+import asyncio
 import json
 import os
 import time
@@ -10,6 +14,8 @@ from datetime import datetime
 from pathlib import Path
 
 import requests
+
+from ollama_turbo_client import OllamaTurboClient
 
 
 def ensure_data_dir():
@@ -172,19 +178,52 @@ def save_data(entries):
     print(f"💾 Saved {len(unique_entries)} entries to {filename}")
 
 
+async def fetch_via_web_search():
+    """
+    PRIMARY: Use Ollama web_search API for GitHub issue/PR discovery
+    """
+    print("🔍 PRIMARY: Using Ollama web_search for GitHub issues/PRs...")
+
+    try:
+        async with OllamaTurboClient() as client:
+            # Search for Ollama-related issues and PRs
+            results = await client.discover_ecosystem_content(
+                query="GitHub issues and pull requests about Ollama, Ollama Cloud, and Ollama Turbo",
+                content_type="discussions",
+                max_results=40
+            )
+
+            print(f"✅ Web search found {len(results)} issues/PRs")
+            return results
+
+    except Exception as e:
+        print(f"⚠️  Web search failed: {e}")
+        print("   Falling back to direct GitHub API...")
+        return []
+
+
 def main():
     """Main ingestion function"""
     print("🚀 Starting GitHub issues/PRs ingestion...")
     ensure_data_dir()
-    
-    # Search for Ollama-related issues and PRs
-    issues = search_github_issues("ollama turbo cloud", max_results=30)
-    prs = search_github_prs("ollama service cloud", max_results=20)
-    
-    # Combine and save
-    all_entries = issues + prs
+
+    # PRIMARY: Try Ollama web_search first
+    web_search_entries = asyncio.run(fetch_via_web_search())
+
+    # FALLBACK: Use direct GitHub API if web_search failed or returned few results
+    if len(web_search_entries) < 10:
+        print("📡 FALLBACK: Using direct GitHub API...")
+        issues = search_github_issues("ollama turbo cloud", max_results=30)
+        prs = search_github_prs("ollama service cloud", max_results=20)
+        fallback_entries = issues + prs
+        all_entries = web_search_entries + fallback_entries
+    else:
+        print("✅ Web search provided sufficient results, skipping fallback")
+        all_entries = web_search_entries
+
+    # Save
     save_data(all_entries)
-    
+
     print("✅ GitHub issues/PRs ingestion complete!")
 
 

@@ -10,13 +10,23 @@ This module provides helper functions to:
 - Generate comparative analysis
 """
 import json
+import os
 import re
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
-from review_database import ReviewDatabase, ProjectReview, get_project_context
+# Try Supabase first, fallback to SQLite
+try:
+    if os.getenv('SUPABASE_URL') and os.getenv('SUPABASE_KEY'):
+        from supabase_database import SupabaseReviewDatabase as ReviewDatabase, ProjectReview, get_project_context
+        print("✅ Using Supabase PostgreSQL database")
+    else:
+        raise ImportError("Supabase credentials not found")
+except (ImportError, Exception) as e:
+    print(f"⚠️  Supabase unavailable, using SQLite: {e}")
+    from review_database import ReviewDatabase, ProjectReview, get_project_context
 
 
 class ReviewIntegration:
@@ -164,19 +174,19 @@ class ReviewIntegration:
         Returns dict mapping project_identifier to context string
         """
         context_map = {}
-        
+
         for item in items:
             url = item.get('url')
             if not url:
                 continue
-            
+
             project_id = self.normalize_project_identifier(url)
-            
-            # Get historical context
-            context = get_project_context(project_id, item)
+
+            # Get historical context using our own db instance
+            context = self.db.generate_historical_context(project_id, item)
             if context:
                 context_map[project_id] = context
-        
+
         return context_map
     
     def store_reviews_from_blog_post(self, items: List[Dict], commentaries: Dict[str, str],

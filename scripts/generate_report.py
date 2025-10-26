@@ -53,16 +53,61 @@ def load_data():
     return aggregated, insights
 
 
+def build_breakthrough_section(aggregated):
+    """Build detailed breakthrough discoveries section with depth"""
+    lines = ["\n## ⚡ Breakthrough Discoveries\n"]
+    lines.append("*The most significant ecosystem signals detected today*\n\n")
+
+    # Get high-impact items
+    high_turbo = sorted(
+        [e for e in aggregated if e.get('turbo_score', 0) >= 0.7],
+        key=lambda x: x.get('turbo_score', 0),
+        reverse=True
+    )[:5]
+
+    if not high_turbo:
+        lines.append("No breakthrough discoveries today - check back tomorrow!\n")
+        return ''.join(lines)
+
+    for i, item in enumerate(high_turbo, 1):
+        title = item.get('title', 'Unknown')[:80]
+        source = item.get('source', 'unknown')
+        score = item.get('turbo_score', 0)
+        url = item.get('url', '#')
+        highlights = item.get('highlights', [])
+
+        lines.append(f"### {i}. {title}\n\n")
+        lines.append(f"**Source**: {source} | **Relevance Score**: {score:.2f}\n\n")
+
+        # Core contribution
+        if highlights:
+            lines.append(f"**Core Contribution**: {highlights[0]}\n\n")
+
+        # Why this matters
+        lines.append(f"**Why This Matters**: This discovery advances the Ollama ecosystem by ")
+        lines.append(f"providing new capabilities and patterns that developers can build upon.\n\n")
+
+        # Ecosystem context
+        lines.append(f"**Ecosystem Context**: Builds on recent developments in the community ")
+        lines.append(f"and represents convergence around important use cases.\n\n")
+
+        # For builders
+        lines.append(f"**For Builders**: You can leverage this to build more sophisticated ")
+        lines.append(f"applications. [Explore Further →]({url})\n\n")
+
+    return ''.join(lines)
+
+
 def build_dev_section(aggregated, insights):
     """Build the 'What This Means for Developers' section with concrete examples"""
     lines = ["\n## 🚀 What This Means for Developers\n"]
     lines.append("*Let's talk about what you can actually DO with all this...*\n")
-    
+
     # Extract some concrete examples from the data
     official = [e for e in aggregated if e.get('source') in ['blog', 'cloud_page']]
     tools = [e for e in aggregated if e.get('source') in ['github', 'reddit']]
     patterns = insights.get('patterns', {})
-    
+
     lines.append("### 💡 What can we build with this?\n")
     if tools:
         lines.append("Based on what the community is shipping:\n")
@@ -74,7 +119,7 @@ def build_dev_section(aggregated, insights):
                 lines.append(f"- **{title}**: {highlight_text}\n")
     else:
         lines.append("- Check back tomorrow for fresh project ideas from the community!\n")
-    
+
     lines.append("\n### 🔧 How can we leverage these tools?\n")
     lines.append("Here's the exciting part - you can combine these discoveries:\n")
     lines.append("```python\n")
@@ -85,7 +130,7 @@ def build_dev_section(aggregated, insights):
     lines.append("])\n")
     lines.append("print(response['message']['content'])\n")
     lines.append("```\n")
-    
+
     lines.append("\n### 🎯 What problems does this solve?\n")
     if official:
         lines.append("The official updates show us:\n")
@@ -95,7 +140,7 @@ def build_dev_section(aggregated, insights):
     lines.append("- **Privacy**: Run AI models locally without sending data to external APIs\n")
     lines.append("- **Cost**: No per-token charges - your hardware, your rules\n")
     lines.append("- **Speed**: Local inference = no network latency\n")
-    
+
     lines.append("\n### ✨ What's now possible that wasn't before?\n")
     if patterns:
         lines.append("Emerging patterns reveal new possibilities:\n")
@@ -171,16 +216,24 @@ def generate_vein_headline(mode, pattern_name, items_count):
 def generate_report_md(aggregated, insights, historical_context=None):
     """Generate EchoVein-style conversational Markdown report"""
     today = get_today_date_str()
-    
+
+    # Get current time in CST
+    from datetime import datetime
+    import pytz
+    cst = pytz.timezone('America/Chicago')
+    current_time_cst = datetime.now(cst).strftime('%I:%M %p CST')
+
     # Determine vein mode and tone
     vein_mode = determine_vein_mode(aggregated, insights)
     mode_name, mode_emoji, mode_description = vein_mode
-    
+
     # Turbo score stats
     high_turbo = [e for e in aggregated if e.get('turbo_score', 0) >= 0.7]
-    
+
     report = f"""# {mode_emoji} Ollama Pulse – {today}
 ## {mode_description}
+
+**Generated**: {current_time_cst} on {today}
 
 *EchoVein here, your vein-tapping oracle excavating Ollama's hidden arteries...*
 
@@ -188,15 +241,60 @@ def generate_report_md(aggregated, insights, historical_context=None):
 
 ---
 
-## 🔬 Vein Analysis: Quick Stats
+## 🔬 Ecosystem Intelligence Summary
 
-- **Total Ore Mined**: {len(aggregated)} items tracked
-- **High-Purity Veins**: {len(high_turbo)} Turbo-focused items (score ≥0.7)
-- **Pattern Arteries**: {insights.get('stats', {}).get('total_patterns', 0)} detected
-- **Prophetic Insights**: {insights.get('stats', {}).get('total_inferences', 0)} inferences drawn
-- **Last Excavation**: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}
+**Today's Snapshot**: Comprehensive analysis of the Ollama ecosystem across 10 data sources.
+
+### Key Metrics
+
+- **Total Items Analyzed**: {len(aggregated)} discoveries tracked across all sources
+- **High-Impact Discoveries**: {len(high_turbo)} items with significant ecosystem relevance (score ≥0.7)
+- **Emerging Patterns**: {insights.get('stats', {}).get('total_patterns', 0)} distinct trend clusters identified
+- **Ecosystem Implications**: {insights.get('stats', {}).get('total_inferences', 0)} actionable insights drawn
+- **Analysis Timestamp**: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}
+
+### What This Means
+
+The ecosystem shows {"strong convergence around key areas" if len(high_turbo) >= 3 else "steady development across multiple fronts"}. {len(high_turbo)} high-impact items suggest {"accelerating development velocity" if len(high_turbo) >= 3 else "consistent innovation"} in these areas.
+
+**Key Insight**: When multiple independent developers converge on similar problems, it signals important directions. Today's patterns suggest the ecosystem is moving toward {"production-ready solutions" if len(high_turbo) >= 3 else "new capabilities"}.
 
 ---
+
+## ⚡ Breakthrough Discoveries
+
+*The most significant ecosystem signals detected today*
+
+"""
+
+    # Add breakthrough section
+    high_turbo_items = sorted(
+        [e for e in aggregated if e.get('turbo_score', 0) >= 0.7],
+        key=lambda x: x.get('turbo_score', 0),
+        reverse=True
+    )[:5]
+
+    if high_turbo_items:
+        for i, item in enumerate(high_turbo_items, 1):
+            title = item.get('title', 'Unknown')[:80]
+            source = item.get('source', 'unknown')
+            score = item.get('turbo_score', 0)
+            url = item.get('url', '#')
+            highlights = item.get('highlights', [])
+
+            report += f"### {i}. {title}\n\n"
+            report += f"**Source**: {source} | **Relevance Score**: {score:.2f}\n\n"
+
+            if highlights:
+                report += f"**Core Contribution**: {highlights[0]}\n\n"
+
+            report += f"**Why This Matters**: This discovery advances the Ollama ecosystem by providing new capabilities and patterns that developers can build upon.\n\n"
+            report += f"**Ecosystem Context**: Builds on recent developments in the community and represents convergence around important use cases.\n\n"
+            report += f"**For Builders**: You can leverage this to build more sophisticated applications. [Explore Further →]({url})\n\n"
+    else:
+        report += "No breakthrough discoveries today - check back tomorrow!\n\n"
+
+    report += """---
 
 ## 🎯 Official Veins: What Ollama Team Pumped Out
 
@@ -243,19 +341,47 @@ def generate_report_md(aggregated, insights, historical_context=None):
         report += "Veins are clustering — here's the arterial map:\n\n"
         for pattern_name, items in patterns.items():
             vein_headline = generate_vein_headline(vein_mode, pattern_name, len(items))
-            report += f"### {vein_headline}\n\n"
-            report += f"*Artery depth: {len(items)} nodes pulsing*\n\n"
+            items_count = len(items)
+
+            # Determine signal strength
+            if items_count >= 5:
+                signal_level = "HIGH"
+                signal_emoji = "🔥"
+            elif items_count >= 3:
+                signal_level = "MEDIUM"
+                signal_emoji = "⚡"
+            else:
+                signal_level = "LOW"
+                signal_emoji = "💫"
+
+            report += f"### {signal_emoji} {vein_headline}\n\n"
+            report += f"**Signal Strength**: {items_count} items detected\n\n"
+
+            # Analysis with convergence
+            report += f"**Analysis**: When {items_count} independent developers converge on "
+            report += f"similar patterns, it signals an important direction. This clustering "
+            report += f"suggests this area has reached a maturity level where meaningful advances are possible.\n\n"
+
+            # Items list
+            report += "**Items in this cluster**:\n"
             for item in items[:5]:
                 title = item.get('title', 'N/A')
                 url = item.get('url', '#')
                 report += f"- [{title}]({url})\n"
-            
+
+            if items_count > 5:
+                report += f"- ... and {items_count - 5} more\n"
+
+            # Add convergence level and confidence
+            report += f"\n**Convergence Level**: {signal_level}\n"
+            report += f"**Confidence**: {'HIGH' if items_count >= 5 else 'MEDIUM' if items_count >= 3 else 'MEDIUM-LOW'}\n\n"
+
             # Add vein commentary
-            if len(items) >= 5:
-                report += f"\n💉 **Vein Take**: This artery's *bulging* — {len(items)} strikes means it's no fluke. "
+            if items_count >= 5:
+                report += f"💉 **EchoVein's Take**: This artery's *bulging* — {items_count} strikes means it's no fluke. "
                 report += f"Watch this space for 2x explosion potential.\n\n"
-            elif len(items) >= 3:
-                report += f"\n⚡ **Vein Take**: Steady throb detected — {len(items)} hits suggests it's gaining flow.\n\n"
+            elif items_count >= 3:
+                report += f"⚡ **EchoVein's Take**: Steady throb detected — {items_count} hits suggests it's gaining flow.\n\n"
             else:
                 report += "\n"
     else:
@@ -302,6 +428,59 @@ def generate_report_md(aggregated, insights, historical_context=None):
             report += bounty_content
     except Exception as e:
         print(f"⚠️  Bounty section error: {e}")
+
+    # Add "What to Watch" section
+    report += "\n---\n\n## 👀 What to Watch\n\n"
+    report += "**Projects to Track for Impact**:\n"
+
+    # Get high-scoring items to watch
+    watch_items = sorted(
+        [e for e in aggregated if e.get('turbo_score', 0) >= 0.5],
+        key=lambda x: x.get('turbo_score', 0),
+        reverse=True
+    )[:3]
+
+    for item in watch_items:
+        title = item.get('title', 'Unknown')[:60]
+        report += f"- {title} (watch for adoption metrics)\n"
+
+    report += "\n**Emerging Trends to Monitor**:\n"
+
+    # Extract top patterns as trends
+    patterns = insights.get('patterns', {})
+    for pattern_name in list(patterns.keys())[:3]:
+        clean_name = pattern_name.replace('_', ' ').title()
+        report += f"- **{clean_name}**: Watch for convergence and standardization\n"
+
+    report += "\n**Confidence Levels**:\n"
+    report += f"- High-Impact Items: HIGH - Strong convergence signal\n"
+    report += f"- Emerging Patterns: MEDIUM-HIGH - Patterns forming\n"
+    report += f"- Speculative Trends: MEDIUM - Monitor for confirmation\n\n"
+
+    # Add "Returning Projects" section if RAG context available
+    if historical_context and 'returning_projects' in historical_context:
+        returning = historical_context['returning_projects']
+        if returning:
+            report += "\n---\n\n## 🔄 Returning to the Veins: Projects We've Tracked Before\n\n"
+            report += "*EchoVein remembers... these projects pulsed through our veins before, and they're back.*\n\n"
+
+            for project in returning[:5]:  # Show top 5
+                name = project.get('project_name', 'Unknown')
+                last_seen = project.get('last_seen', 'Unknown')
+                total_mentions = project.get('total_mentions', 0)
+                avg_score = project.get('avg_turbo_score', 0)
+                trend = project.get('trend_direction', 'STABLE')
+                highlights = project.get('last_highlights', 'No highlights available')
+
+                trend_emoji = "📈" if trend == "UP" else "📉" if trend == "DOWN" else "➡️"
+                score_emoji = "🔥" if avg_score >= 0.7 else "⚡" if avg_score >= 0.5 else "💡"
+
+                report += f"### {trend_emoji} {name}\n\n"
+                report += f"**Last Seen**: {last_seen} | **Total Mentions**: {total_mentions} | **Avg Score**: {score_emoji} {avg_score:.2f}\n\n"
+                report += f"**Previous Highlights**: {highlights}\n\n"
+                report += f"**What's New**: This project is back in the ecosystem pulse. Check the tools/discoveries sections above for latest updates.\n\n"
+
+            report += "*The veins remember. These projects have proven staying power.* 🩸\n\n"
 
     # Add Nostr section
     report += "\n---\n\n## 🌐 Nostr Veins: Decentralized Pulse\n\n"
@@ -421,6 +600,17 @@ def generate_report_md(aggregated, insights, historical_context=None):
     report += "  });\n"
     report += "</script>\n\n"
 
+    # Add viral hashtags for social sharing
+    report += "\n---\n\n## 🔖 Share This Report\n\n"
+    viral_hashtags = [
+        "#AI", "#Ollama", "#LocalLLM", "#OpenSource", "#MachineLearning",
+        "#DevTools", "#Innovation", "#TechNews", "#AIResearch", "#Developers"
+    ]
+    report += f"**Hashtags**: {' '.join(viral_hashtags)}\n\n"
+    report += f"**Share on**: [Twitter](https://twitter.com/intent/tweet?text=Check%20out%20Ollama%20Pulse%20{today}%20Report&url=https://grumpified-oggvct.github.io/ollama_pulse/reports/pulse-{today}&hashtags={','.join([h.replace('#', '') for h in viral_hashtags[:5]])}) | "
+    report += f"[LinkedIn](https://www.linkedin.com/sharing/share-offsite/?url=https://grumpified-oggvct.github.io/ollama_pulse/reports/pulse-{today}) | "
+    report += f"[Reddit](https://reddit.com/submit?url=https://grumpified-oggvct.github.io/ollama_pulse/reports/pulse-{today}&title=Ollama%20Pulse%20{today}%20Report)\n\n"
+
     report += "*Built by vein-tappers, for vein-tappers. Dig deeper. Ship harder.* ⛏️🩸\n"
 
     return report
@@ -439,7 +629,7 @@ def get_all_reports():
 
 
 def save_report(report_md):
-    """Save the report as both Markdown and HTML with Jekyll front matter"""
+    """Save the report to docs/reports with Jekyll front matter and comprehensive SEO"""
     ensure_reports_dir()
     today = get_today_date_str()
 
@@ -448,29 +638,114 @@ def save_report(report_md):
     # Add current report if not in list
     if f"pulse-{today}" not in all_reports:
         all_reports.insert(0, f"pulse-{today}")
-    
+
     reports_json = json.dumps(all_reports)
-    
+
+    # SEO Keywords and Hashtags
+    seo_keywords = [
+        "Ollama ecosystem",
+        "AI development",
+        "local LLM",
+        "machine learning tools",
+        "open source AI",
+        "Ollama Turbo",
+        "Ollama Cloud",
+        "AI innovation",
+        "developer tools",
+        "AI trends"
+    ]
+
+    viral_hashtags = [
+        "AI", "Ollama", "LocalLLM", "OpenSource", "MachineLearning",
+        "DevTools", "Innovation", "TechNews", "AIResearch", "Developers"
+    ]
+
+    # Generate description from report content (first 200 chars)
+    description_text = report_md.split('\n')[0:5]
+    description = ' '.join([line.strip() for line in description_text if line.strip() and not line.startswith('#')])[:200]
+    if len(description) > 197:
+        description = description[:197] + "..."
+
+    # Comprehensive SEO meta tags
+    seo_meta_tags = f"""
+<!-- Primary Meta Tags -->
+<meta name="title" content="Ollama Pulse - {today} Ecosystem Report">
+<meta name="description" content="{description}">
+<meta name="keywords" content="{', '.join(seo_keywords)}">
+<meta name="author" content="EchoVein Oracle">
+<meta name="robots" content="index, follow">
+<meta name="language" content="English">
+<meta name="revisit-after" content="1 days">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://grumpified-oggvct.github.io/ollama_pulse/reports/pulse-{today}">
+<meta property="og:title" content="Ollama Pulse - {today} Ecosystem Intelligence">
+<meta property="og:description" content="{description}">
+<meta property="og:image" content="https://grumpified-oggvct.github.io/ollama_pulse/assets/banner.png">
+<meta property="og:site_name" content="Ollama Pulse">
+<meta property="article:published_time" content="{today}T00:00:00Z">
+<meta property="article:author" content="EchoVein Oracle">
+<meta property="article:section" content="Technology">
+<meta property="article:tag" content="{', '.join(viral_hashtags[:5])}">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://grumpified-oggvct.github.io/ollama_pulse/reports/pulse-{today}">
+<meta name="twitter:title" content="Ollama Pulse - {today} Ecosystem Intelligence">
+<meta name="twitter:description" content="{description}">
+<meta name="twitter:image" content="https://grumpified-oggvct.github.io/ollama_pulse/assets/banner.png">
+<meta name="twitter:creator" content="@GrumpifiedOGGVCT">
+
+<!-- Canonical URL -->
+<link rel="canonical" href="https://grumpified-oggvct.github.io/ollama_pulse/reports/pulse-{today}">
+
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json">
+{{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Ollama Pulse - {today} Ecosystem Intelligence",
+  "description": "{description}",
+  "image": "https://grumpified-oggvct.github.io/ollama_pulse/assets/banner.png",
+  "author": {{
+    "@type": "Person",
+    "name": "EchoVein Oracle"
+  }},
+  "publisher": {{
+    "@type": "Organization",
+    "name": "Ollama Pulse",
+    "logo": {{
+      "@type": "ImageObject",
+      "url": "https://grumpified-oggvct.github.io/ollama_pulse/assets/banner.png"
+    }}
+  }},
+  "datePublished": "{today}T00:00:00Z",
+  "dateModified": "{today}T00:00:00Z",
+  "mainEntityOfPage": {{
+    "@type": "WebPage",
+    "@id": "https://grumpified-oggvct.github.io/ollama_pulse/reports/pulse-{today}"
+  }},
+  "keywords": "{', '.join(seo_keywords)}"
+}}
+</script>
+"""
+
     md_front_matter = f"""---
 layout: default
 title: Pulse {today}
 ---
 
 <meta name="available-reports" content='{reports_json}'>
+{seo_meta_tags}
 
 """
 
-    # Save Markdown version to docs/reports
+    # Save Markdown version to docs/reports (PRIMARY location for GitHub Pages)
     md_path = REPORTS_DIR / f"pulse-{today}.md"
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write(md_front_matter + report_md)
     print(f"💾 Saved Markdown report to {md_path}")
-
-    # Also save to root reports directory for backward compatibility
-    root_md_path = ROOT_REPORTS_DIR / f"pulse-{today}.md"
-    with open(root_md_path, 'w', encoding='utf-8') as f:
-        f.write(md_front_matter + report_md)
-    print(f"💾 Saved Markdown report to {root_md_path}")
 
     # Update index.html with Jekyll front matter
     index_front_matter = """---
@@ -484,15 +759,24 @@ title: Ollama Pulse - Daily Ecosystem Intelligence
     all_reports_list = get_all_reports()
     reports_html = ""
     
+    # Get current time in CST for latest report
+    from datetime import datetime
+    import pytz
+    cst = pytz.timezone('America/Chicago')
+    current_time_cst = datetime.now(cst).strftime('%I:%M %p CST')
+
     for idx, report_name in enumerate(all_reports_list):
         report_date = report_name.replace('pulse-', '')
         is_latest = idx == 0
         badge = ' <span style="background: #60a5fa; color: #0f172a; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">LATEST</span>' if is_latest else ''
-        
+
+        # Show time for latest report, just date for others
+        generated_text = f"{current_time_cst} on {report_date}" if is_latest else report_date
+
         reports_html += f"""  <div class="card">
     <h3>{'📡 ' if is_latest else ''}Report: {report_date}{badge}</h3>
     <p>Ollama ecosystem discoveries from {report_date}</p>
-    <p class="meta">Generated: {report_date}</p>
+    <p class="meta">Generated: {generated_text}</p>
     <a href="reports/{report_name}.html">Read full report →</a>
   </div>
 """
@@ -560,7 +844,7 @@ title: Ollama Pulse - Daily Ecosystem Intelligence
 
 def main():
     print("🚀 Starting conversational report generation...")
-    
+
     # Initialize review integration if available
     integration = None
     if REVIEW_DB_AVAILABLE:
@@ -569,13 +853,25 @@ def main():
             print("✅ Review database integration enabled")
         except Exception as e:
             print(f"⚠️  Review database error: {e}")
-    
+
+    # Initialize RAG engine if available
+    rag_engine = None
+    try:
+        from langchain_adaptive import AdaptiveProphecyEngine
+        rag_engine = AdaptiveProphecyEngine()
+        if rag_engine.initialize():
+            print("✅ RAG engine initialized with vector embeddings")
+        else:
+            rag_engine = None
+    except Exception as e:
+        print(f"⚠️  RAG engine unavailable: {e}")
+
     aggregated, insights = load_data()
-    
+
     if not aggregated and not insights:
         print("⚠️  No data available to generate report")
         return
-    
+
     # Get historical context
     historical_context = {}
     if integration:
@@ -584,7 +880,29 @@ def main():
             print(f"📊 Retrieved historical context for {len(historical_context)} items")
         except Exception as e:
             print(f"⚠️  Error getting historical context: {e}")
-    
+
+    # Get returning projects using RAG
+    if rag_engine:
+        try:
+            # Extract project names from aggregated data
+            current_projects = [item.get('title', '') for item in aggregated if item.get('title')]
+            returning_projects = rag_engine.get_returning_projects(current_projects, days_back=7)
+
+            if returning_projects:
+                historical_context['returning_projects'] = returning_projects
+                print(f"🔄 Found {len(returning_projects)} returning projects")
+        except Exception as e:
+            print(f"⚠️  Error finding returning projects: {e}")
+
+    # Cleanup RAG engine before writing to database
+    if rag_engine:
+        try:
+            rag_engine.cleanup()
+            import time
+            time.sleep(0.2)  # Brief delay to ensure cleanup completes
+        except Exception as e:
+            print(f"⚠️  RAG cleanup warning: {e}")
+
     report_md = generate_report_md(aggregated, insights, historical_context)
     save_report(report_md)
     

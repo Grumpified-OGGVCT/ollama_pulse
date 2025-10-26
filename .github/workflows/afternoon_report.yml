@@ -1,0 +1,95 @@
+name: Ollama Pulse Afternoon Report (16:30 CT)
+
+on:
+  schedule:
+    - cron: '30 21 * * *'   # 16:30 CDT/CST (UTC-5/-6)
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Force run even if not 16:30 CT'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ollama-pulse-afternoon-report
+  cancel-in-progress: false
+
+jobs:
+  afternoon_report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Gate by Chicago local time (ensure 16:30 CT)
+        if: ${{ !inputs.force_run }}
+        env:
+          TZ: America/Chicago
+        run: |
+          echo "Local time: $(date)"
+          HOUR=$(date +%H)
+          MINUTE=$(date +%M)
+          if [ "$HOUR" != "16" ] || [ "$MINUTE" -lt "30" ] || [ "$MINUTE" -gt "45" ]; then
+            echo "::warning::Not 16:30 CT (current: ${HOUR}:${MINUTE}) – skipping"
+            exit 0
+          fi
+          echo "✓ Time gate passed: 16:30 CT"
+
+      - name: Generate afternoon report
+        env:
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          cd scripts
+          python generate_report.py
+          python update_index.py
+          echo "::notice::Afternoon report generated and index updated"
+
+      - name: Post report to Nostr
+        if: always()
+        env:
+          NOSTR_PRIVATE_KEY: ${{ secrets.NOSTR_PRIVATE_KEY }}
+        run: |
+          cd scripts
+          python post_to_nostr.py
+          echo "::notice::Report posted to Nostr"
+        continue-on-error: true
+
+      - name: Commit and push report
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "feat(report): afternoon Ollama Pulse $(date -u '+%Y-%m-%d %H:%M')"
+          file_pattern: 'docs/**'
+          commit_user_name: Ollama Pulse Bot
+          commit_user_email: pulse@ollama-pulse.github.io
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afternoon-report-${{ github.run_number }}
+          path: docs/reports/
+          retention-days: 7
+          if-no-files-found: warn
+

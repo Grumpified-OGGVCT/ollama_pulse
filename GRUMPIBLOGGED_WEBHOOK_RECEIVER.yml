@@ -1,0 +1,137 @@
+# ⚠️ THIS FILE SHOULD BE PLACED IN: GrumpiBlogged/.github/workflows/aggregate_reports.yml
+# This is a TEMPLATE for the GrumpiBlogged repository
+
+name: Aggregate Multi-Repo Reports
+
+on:
+  repository_dispatch:
+    types:
+      - ollama-pulse-update
+      - ai-research-daily-update
+  schedule:
+    # Daily at 18:00 CT (23:00 UTC during CDT, 00:00 UTC during CST)
+    - cron: '0 23 * * *'  # 18:00 CDT
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Force run meta-report generation'
+        required: false
+        default: 'false'
+
+jobs:
+  aggregate-reports:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout GrumpiBlogged
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 markdown pyyaml
+      
+      - name: Fetch Ollama Pulse latest report
+        id: ollama_pulse
+        run: |
+          # Fetch latest report from Ollama Pulse
+          OLLAMA_PULSE_URL="https://grumpified-oggvct.github.io/ollama_pulse/reports/"
+          
+          # Get the index page to find latest report
+          curl -s "$OLLAMA_PULSE_URL" > ollama_index.html
+          
+          # Extract latest report link (this is simplified - you may need to parse HTML properly)
+          LATEST_REPORT=$(grep -oP 'pulse-\d{4}-\d{2}-\d{2}' ollama_index.html | head -1)
+          
+          if [ -n "$LATEST_REPORT" ]; then
+            REPORT_URL="${OLLAMA_PULSE_URL}${LATEST_REPORT}.html"
+            echo "report_url=$REPORT_URL" >> $GITHUB_OUTPUT
+            echo "report_date=$LATEST_REPORT" >> $GITHUB_OUTPUT
+            echo "✅ Found Ollama Pulse report: $REPORT_URL"
+          else
+            echo "⚠️ No Ollama Pulse report found"
+            echo "report_url=" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Fetch AI Research Daily latest report
+        id: ai_research
+        run: |
+          # Fetch latest report from AI Research Daily
+          AI_RESEARCH_URL="https://grumpified-oggvct.github.io/AI_Research_Daily/"
+          
+          # Similar logic to fetch latest report
+          curl -s "$AI_RESEARCH_URL" > ai_research_index.html
+          
+          # Extract latest report link
+          LATEST_REPORT=$(grep -oP 'report-\d{4}-\d{2}-\d{2}' ai_research_index.html | head -1)
+          
+          if [ -n "$LATEST_REPORT" ]; then
+            REPORT_URL="${AI_RESEARCH_URL}${LATEST_REPORT}.html"
+            echo "report_url=$REPORT_URL" >> $GITHUB_OUTPUT
+            echo "report_date=$LATEST_REPORT" >> $GITHUB_OUTPUT
+            echo "✅ Found AI Research Daily report: $REPORT_URL"
+          else
+            echo "⚠️ No AI Research Daily report found"
+            echo "report_url=" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Generate meta-report
+        run: |
+          # Create meta-report aggregating all sources
+          python scripts/generate_meta_report.py \
+            --ollama-pulse "${{ steps.ollama_pulse.outputs.report_url }}" \
+            --ai-research "${{ steps.ai_research.outputs.report_url }}" \
+            --output "docs/posts/meta-report-$(date +%Y-%m-%d).md"
+      
+      - name: Commit and push meta-report
+        run: |
+          git config user.name "GrumpiBlogged Bot"
+          git config user.email "bot@grumpiblogged.com"
+          
+          git add docs/posts/
+          git commit -m "🤖 Meta-report $(date +%Y-%m-%d): Aggregated Ollama Pulse + AI Research Daily" || echo "No changes to commit"
+          git push
+      
+      - name: Log aggregation
+        run: |
+          echo "✅ Meta-report generation complete"
+          echo "📅 Date: $(date +%Y-%m-%d)"
+          echo "🔗 Ollama Pulse: ${{ steps.ollama_pulse.outputs.report_url }}"
+          echo "🔗 AI Research: ${{ steps.ai_research.outputs.report_url }}"
+
+# NOTES FOR IMPLEMENTATION:
+# 
+# 1. Create scripts/generate_meta_report.py in GrumpiBlogged repo
+# 2. This script should:
+#    - Fetch HTML from both report URLs
+#    - Extract key insights, discoveries, trends
+#    - Generate a unified meta-report in GrumpiBlogged style
+#    - Include links back to source reports
+#    - Add SEO tags, hashtags, social sharing
+# 
+# 3. Set up GitHub Secret in Ollama Pulse:
+#    - Name: GRUMPIBLOGGED_PAT
+#    - Value: Personal Access Token with repo:write scope
+#    - This allows Ollama Pulse to trigger GrumpiBlogged workflows
+# 
+# 4. Directory structure in GrumpiBlogged:
+#    docs/
+#    ├── posts/
+#    │   ├── meta-report-2025-10-26.md
+#    │   ├── meta-report-2025-10-27.md
+#    │   └── ...
+#    └── index.html
+# 
+# 5. Meta-report format should include:
+#    - Date and time (18:00 CT)
+#    - Summary of Ollama Pulse discoveries
+#    - Summary of AI Research Daily insights
+#    - Cross-repo connections and patterns
+#    - Links to full reports
+#    - SEO tags and hashtags
+#    - Social sharing buttons
+

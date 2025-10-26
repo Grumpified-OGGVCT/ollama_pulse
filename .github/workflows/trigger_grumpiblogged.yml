@@ -1,0 +1,62 @@
+name: Trigger GrumpiBlogged Meta-Report
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/reports/pulse-*.md'
+  workflow_dispatch:
+    inputs:
+      force_trigger:
+        description: 'Force trigger GrumpiBlogged'
+        required: false
+        default: 'false'
+
+jobs:
+  notify-grumpiblogged:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Get latest report info
+        id: report_info
+        run: |
+          # Get the most recent report file
+          LATEST_REPORT=$(ls -t docs/reports/pulse-*.md | head -1)
+          REPORT_DATE=$(basename "$LATEST_REPORT" .md | sed 's/pulse-//')
+          REPORT_URL="https://grumpified-oggvct.github.io/ollama_pulse/reports/$(basename "$LATEST_REPORT" .md)"
+          
+          echo "report_file=$LATEST_REPORT" >> $GITHUB_OUTPUT
+          echo "report_date=$REPORT_DATE" >> $GITHUB_OUTPUT
+          echo "report_url=$REPORT_URL" >> $GITHUB_OUTPUT
+          
+          # Extract first 200 chars for description
+          DESCRIPTION=$(head -20 "$LATEST_REPORT" | grep -v "^---" | grep -v "^#" | grep -v "^<" | head -5 | tr '\n' ' ' | cut -c1-200)
+          echo "description=$DESCRIPTION" >> $GITHUB_OUTPUT
+      
+      - name: Trigger GrumpiBlogged workflow
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GRUMPIBLOGGED_PAT }}
+          repository: Grumpified-OGGVCT/GrumpiBlogged
+          event-type: ollama-pulse-update
+          client-payload: |
+            {
+              "source": "ollama_pulse",
+              "report_date": "${{ steps.report_info.outputs.report_date }}",
+              "report_url": "${{ steps.report_info.outputs.report_url }}",
+              "description": "${{ steps.report_info.outputs.description }}",
+              "timestamp": "${{ github.event.head_commit.timestamp }}",
+              "commit_sha": "${{ github.sha }}"
+            }
+      
+      - name: Log webhook trigger
+        run: |
+          echo "✅ Triggered GrumpiBlogged meta-report aggregation"
+          echo "📅 Report Date: ${{ steps.report_info.outputs.report_date }}"
+          echo "🔗 Report URL: ${{ steps.report_info.outputs.report_url }}"
+          echo "📝 Description: ${{ steps.report_info.outputs.description }}"
+

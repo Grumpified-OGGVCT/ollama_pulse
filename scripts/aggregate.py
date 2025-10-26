@@ -85,12 +85,16 @@ def aggregate_data():
     # Load from all sources
     official = load_source_data("official")
     community = load_source_data("community")
-    tools = load_source_data("tools")`n    bounties = load_source_data("bounties")
-    
+    tools = load_source_data("tools")
+    bounties = load_source_data("bounties")
+    nostr = load_source_data("nostr")
+
     print(f"  📊 Official: {len(official)} entries")
     print(f"  📊 Community: {len(community)} entries")
-    print(f"  📊 Tools: {len(tools)} entries")`n    print(f"  💰 Bounties: {len(bounties)} entries")
-    
+    print(f"  📊 Tools: {len(tools)} entries")
+    print(f"  💰 Bounties: {len(bounties)} entries")
+    print(f"  🌐 Nostr: {len(nostr)} entries")
+
     # Combine all
     all_entries = official + community + tools + bounties + nostr
     

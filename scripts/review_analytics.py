@@ -12,11 +12,22 @@ Usage:
 """
 import argparse
 import json
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List
 
-from review_database import ReviewDatabase
+# Try Supabase first, fallback to SQLite
+try:
+    if os.getenv('SUPABASE_URL') and os.getenv('SUPABASE_KEY'):
+        from supabase_database import SupabaseReviewDatabase as ReviewDatabase
+        print("✅ Using Supabase PostgreSQL database")
+    else:
+        raise ImportError("Supabase credentials not found")
+except (ImportError, Exception) as e:
+    print(f"⚠️  Supabase unavailable, using SQLite: {e}")
+    from review_database import ReviewDatabase
+
 from review_integration import ReviewIntegration
 
 

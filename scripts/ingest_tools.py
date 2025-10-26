@@ -2,13 +2,19 @@
 """
 Ollama Pulse - Tools & Integrations Ingestion
 Polls GitHub, n8n marketplace for Ollama integrations
+
+PRIMARY: Uses Ollama web_search API for intelligent discovery
+FALLBACK: Direct GitHub API calls if web_search fails
 """
+import asyncio
 import json
 import os
 from datetime import datetime
 from pathlib import Path
 
 import requests
+
+from ollama_turbo_client import OllamaTurboClient
 
 
 def ensure_data_dir():
@@ -85,17 +91,50 @@ def save_data(entries):
     print(f"💾 Saved {len(unique_entries)} entries to {filename}")
 
 
+async def fetch_via_web_search():
+    """
+    PRIMARY: Use Ollama web_search API for intelligent tool discovery
+    """
+    print("🔍 PRIMARY: Using Ollama web_search for tool discovery...")
+
+    try:
+        async with OllamaTurboClient() as client:
+            # Search for Ollama tools and integrations
+            results = await client.discover_ecosystem_content(
+                query="Ollama tools, libraries, integrations, and projects on GitHub, npm, PyPI",
+                content_type="tools",
+                max_results=30
+            )
+
+            print(f"✅ Web search found {len(results)} tools")
+            return results
+
+    except Exception as e:
+        print(f"⚠️  Web search failed: {e}")
+        print("   Falling back to direct GitHub API...")
+        return []
+
+
 def main():
     """Main ingestion function"""
     print("🚀 Starting tools & integrations ingestion...")
     ensure_data_dir()
-    
-    # Fetch from all sources
-    github_entries = fetch_github_repos()
-    
+
+    # PRIMARY: Try Ollama web_search first
+    web_search_entries = asyncio.run(fetch_via_web_search())
+
+    # FALLBACK: Use direct GitHub API if web_search failed or returned few results
+    if len(web_search_entries) < 10:
+        print("📡 FALLBACK: Using direct GitHub API...")
+        github_entries = fetch_github_repos()
+        all_entries = web_search_entries + github_entries
+    else:
+        print("✅ Web search provided sufficient results, skipping fallback")
+        all_entries = web_search_entries
+
     # Save
-    save_data(github_entries)
-    
+    save_data(all_entries)
+
     print("✅ Tools & integrations ingestion complete!")
 
 

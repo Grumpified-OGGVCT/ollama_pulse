@@ -1,12 +1,12 @@
-name: Ollama Pulse Daily Report
+name: Ollama Pulse Morning Report (08:30 CT)
 
 on:
   schedule:
-    - cron: '0 13 * * *'   # 08:00 CDT/CST (UTC-5/-6)
+    - cron: '30 13 * * *'   # 08:30 CDT/CST (UTC-5/-6)
   workflow_dispatch:
     inputs:
       force_run:
-        description: 'Force run even if not 08:00 CT'
+        description: 'Force run even if not 08:30 CT'
         required: false
         default: 'false'
         type: boolean
@@ -17,11 +17,11 @@ permissions:
   id-token: write
 
 concurrency:
-  group: ollama-pulse-daily-report
+  group: ollama-pulse-morning-report
   cancel-in-progress: false
 
 jobs:
-  daily_report:
+  morning_report:
     runs-on: ubuntu-latest
 
     steps:
@@ -41,24 +41,30 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Gate by Chicago local time (ensure 08:00 CT)
+      - name: Gate by Chicago local time (ensure 08:30 CT)
         if: ${{ !inputs.force_run }}
         env:
           TZ: America/Chicago
         run: |
           echo "Local time: $(date)"
           HOUR=$(date +%H)
-          if [ "$HOUR" != "08" ]; then
-            echo "::warning::Not 08:00 CT (current: ${HOUR}:00) â€” skipping"
+          MINUTE=$(date +%M)
+          if [ "$HOUR" != "08" ] || [ "$MINUTE" -lt "30" ] || [ "$MINUTE" -gt "45" ]; then
+            echo "::warning::Not 08:30 CT (current: ${HOUR}:${MINUTE}) – skipping"
             exit 0
           fi
-          echo "âœ“ Time gate passed: 08:00 CT"
+          echo "✓ Time gate passed: 08:30 CT"
 
-      - name: Generate themed daily report
+      - name: Generate morning report
+        env:
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           cd scripts
           python generate_report.py
-          echo "::notice::Report generated"
+          python update_index.py
+          echo "::notice::Morning report generated and index updated"
 
       - name: Post report to Nostr
         if: always()
@@ -73,7 +79,7 @@ jobs:
       - name: Commit and push report
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "feat(report): daily Ollama Pulse $(date -u '+%Y-%m-%d')"
+          commit_message: "feat(report): morning Ollama Pulse $(date -u '+%Y-%m-%d %H:%M')"
           file_pattern: 'docs/**'
           commit_user_name: Ollama Pulse Bot
           commit_user_email: pulse@ollama-pulse.github.io
@@ -82,7 +88,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: daily-report-${{ github.run_number }}
+          name: morning-report-${{ github.run_number }}
           path: docs/reports/
           retention-days: 7
           if-no-files-found: warn
+

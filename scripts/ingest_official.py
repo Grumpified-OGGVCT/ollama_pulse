@@ -2,7 +2,11 @@
 """
 Ollama Pulse - Official Sources Ingestion
 Polls Ollama blog RSS and /cloud page for official updates
+
+PRIMARY: Uses Ollama web_search API for official announcements
+FALLBACK: Direct RSS/scraping if web_search fails
 """
+import asyncio
 import json
 import os
 import re
@@ -12,6 +16,8 @@ from pathlib import Path
 import feedparser
 import requests
 from bs4 import BeautifulSoup
+
+from ollama_turbo_client import OllamaTurboClient
 
 
 def ensure_data_dir():
@@ -123,19 +129,52 @@ def save_data(entries):
     print(f"💾 Saved {len(unique_entries)} entries to {filename}")
 
 
+async def fetch_via_web_search():
+    """
+    PRIMARY: Use Ollama web_search API for official announcements
+    """
+    print("🔍 PRIMARY: Using Ollama web_search for official updates...")
+
+    try:
+        async with OllamaTurboClient() as client:
+            # Search for official Ollama announcements
+            results = await client.discover_ecosystem_content(
+                query="Official Ollama announcements, blog posts, and cloud updates from ollama.com",
+                content_type="news",
+                max_results=20
+            )
+
+            print(f"✅ Web search found {len(results)} official updates")
+            return results
+
+    except Exception as e:
+        print(f"⚠️  Web search failed: {e}")
+        print("   Falling back to direct RSS/scraping...")
+        return []
+
+
 def main():
     """Main ingestion function"""
     print("🚀 Starting official sources ingestion...")
     ensure_data_dir()
-    
-    # Fetch from all sources
-    blog_entries = fetch_blog_rss()
-    cloud_entries = fetch_cloud_page()
-    
-    # Combine and save
-    all_entries = blog_entries + cloud_entries
+
+    # PRIMARY: Try Ollama web_search first
+    web_search_entries = asyncio.run(fetch_via_web_search())
+
+    # FALLBACK: Use direct RSS/scraping if web_search failed or returned few results
+    if len(web_search_entries) < 5:
+        print("📡 FALLBACK: Using direct RSS/scraping...")
+        blog_entries = fetch_blog_rss()
+        cloud_entries = fetch_cloud_page()
+        fallback_entries = blog_entries + cloud_entries
+        all_entries = web_search_entries + fallback_entries
+    else:
+        print("✅ Web search provided sufficient results, skipping fallback")
+        all_entries = web_search_entries
+
+    # Save
     save_data(all_entries)
-    
+
     print("✅ Official sources ingestion complete!")
 
 
