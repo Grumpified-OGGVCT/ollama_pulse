@@ -47,21 +47,21 @@ class OllamaTurboClient:
 
     async def check_model_availability(self) -> List[str]:
         """
-        Preflight check: GET /api/tags to verify available models
+        Preflight check: GET /v1/models to verify available models (OpenAI-compatible)
 
         Returns:
             List of available model IDs
         """
         try:
-            url = f"{self.base_url}/api/tags"
+            url = f"{self.base_url}/v1/models"
             async with self.session.get(url) as response:
                 response.raise_for_status()
                 data = await response.json()
-                models = data.get("models", [])
-                model_ids = [m.get("name", "") for m in models]
+                models = data.get("data", [])
+                model_ids = [m.get("id", "") for m in models]
                 return model_ids
         except Exception as e:
-            print(f"⚠️  /api/tags preflight check failed: {e}")
+            print(f"⚠️  /v1/models preflight check failed: {e}")
             return []
 
     def get_fallback_model(self, requested_model: str, available_models: List[str]) -> str:
@@ -152,30 +152,27 @@ class OllamaTurboClient:
             Generated text or JSON string
         """
 
-        url = f"{self.base_url}/api/chat"
+        url = f"{self.base_url}/v1/chat/completions"
 
         payload = {
             'model': model,
             'messages': [{'role': 'user', 'content': prompt}],
-            'stream': False,
-            'options': {
-                'num_predict': max_tokens,
-                'temperature': temperature
-            }
+            'max_tokens': max_tokens,
+            'temperature': temperature
         }
 
-        # Enable web search as fallback
+        # Enable web search as fallback (if supported)
         if web_search:
             payload['web_search'] = True
 
         # Enable structured outputs for clean data
         if structured_output:
-            payload['format'] = structured_output
+            payload['response_format'] = {"type": "json_object", "schema": structured_output}
 
         async with self.session.post(url, json=payload) as response:
             response.raise_for_status()
             data = await response.json()
-            return data['message']['content']
+            return data['choices'][0]['message']['content']
 
     async def web_search_fallback(
         self,
