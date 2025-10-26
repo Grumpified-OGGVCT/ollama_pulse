@@ -267,14 +267,14 @@ async def fetch_via_web_search():
             discussions = await client.discover_ecosystem_content(
                 query="Ollama community discussions, tutorials, and user experiences from Reddit, HackerNews, YouTube",
                 content_type="discussions",
-                max_results=30
+                max_results=15  # Reduced from 30 - only request what we expect to find
             )
 
             # Search for tools and integrations
             tools = await client.discover_ecosystem_content(
                 query="Ollama tools, integrations, and projects from GitHub, HuggingFace, and developer blogs",
                 content_type="tools",
-                max_results=20
+                max_results=15  # Reduced from 20 - only request what we expect to find
             )
 
             # Combine results

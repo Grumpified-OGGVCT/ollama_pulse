@@ -135,7 +135,7 @@ async def fetch_via_web_search(filter_type="turbo"):
             results = await client.discover_ecosystem_content(
                 query=query,
                 content_type="tools",
-                max_results=30
+                max_results=15  # Reduced from 30 - only request what we expect to find
             )
 
             print(f"✅ Web search found {len(results)} cloud models")

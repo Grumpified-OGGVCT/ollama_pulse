@@ -103,7 +103,7 @@ async def fetch_via_web_search():
             results = await client.discover_ecosystem_content(
                 query="Ollama tools, libraries, integrations, and projects on GitHub, npm, PyPI",
                 content_type="tools",
-                max_results=30
+                max_results=20  # Reduced from 30 - only request what we expect to find
             )
 
             print(f"✅ Web search found {len(results)} tools")

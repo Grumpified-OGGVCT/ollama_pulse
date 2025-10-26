@@ -232,7 +232,7 @@ class OllamaTurboClient:
 Content type: {content_type}
 Focus on: Ollama ecosystem (models, tools, integrations, discussions)
 
-Return EXACTLY {max_results} results as a JSON array with this structure:
+Return UP TO {max_results} REAL results as a JSON array with this structure:
 [
   {{
     "title": "Project/Article title",
@@ -244,7 +244,11 @@ Return EXACTLY {max_results} results as a JSON array with this structure:
   }}
 ]
 
-IMPORTANT: Return ONLY the JSON array, no other text."""
+CRITICAL RULES:
+- Only return REAL results you actually found via web search
+- If you find fewer than {max_results} results, that's OK - return what you found
+- DO NOT fabricate or hallucinate results to reach the target number
+- Return ONLY the JSON array, no other text."""
 
         try:
             response = await self.generate(
@@ -257,7 +261,28 @@ IMPORTANT: Return ONLY the JSON array, no other text."""
 
             # Parse JSON response
             results = json.loads(response)
-            return results if isinstance(results, list) else []
+            if not isinstance(results, list):
+                return []
+
+            # Validate results to filter out hallucinations
+            validated_results = []
+            for item in results:
+                # Basic validation: must have title, url, and summary
+                if not all(key in item for key in ['title', 'url', 'summary']):
+                    print(f"⚠️  Skipping invalid result (missing required fields): {item.get('title', 'Unknown')}")
+                    continue
+
+                # URL must be a valid URL
+                if not item['url'].startswith(('http://', 'https://')):
+                    print(f"⚠️  Skipping invalid URL: {item['url']}")
+                    continue
+
+                validated_results.append(item)
+
+            if len(validated_results) < len(results):
+                print(f"⚠️  Filtered out {len(results) - len(validated_results)} invalid results")
+
+            return validated_results
 
         except Exception as e:
             print(f"⚠️  Web search discovery failed: {e}")
