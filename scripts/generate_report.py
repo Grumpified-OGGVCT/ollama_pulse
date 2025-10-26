@@ -10,7 +10,8 @@ from pathlib import Path
 
 # Import review database integration
 try:
-    from review_integration import ReviewIntegration`nfrom bounty_section import render_bounty_section
+    from review_integration import ReviewIntegration
+    from bounty_section import render_bounty_section
     REVIEW_DB_AVAILABLE = True
 except ImportError:
     REVIEW_DB_AVAILABLE = False
@@ -307,17 +308,18 @@ def generate_report_md(aggregated, insights, historical_context=None):
     if os.path.exists(nostr_file):
         with open(nostr_file, 'r', encoding='utf-8') as f:
             nostr_data = json.load(f)
-            if nostr_data:
-                report += f"**{len(nostr_data)} Nostr articles** detected on the decentralized network:\n\n"
+            posts = nostr_data.get('posts', []) if isinstance(nostr_data, dict) else nostr_data
+            if posts:
+                report += f"**{len(posts)} Nostr articles** detected on the decentralized network:\n\n"
                 report += "| Article | Author | Turbo Score | Read |\n"
                 report += "|---------|--------|-------------|------|\n"
-                for item in nostr_data[:5]:
+                for item in posts[:5]:
                     title = item.get('title', 'Untitled')[:50]
-                    author = item.get('author', 'Unknown')[:20]
+                    author_npub = item.get('author_npub', 'Unknown')[:20]
                     score = item.get('turbo_score', 0)
                     score_emoji = "🔥" if score >= 0.7 else "⚡" if score >= 0.5 else "💡"
                     url = item.get('url', '#')
-                    report += f"| {title} | {author} | {score_emoji} {score:.1f} | [📖]({url}) |\n"
+                    report += f"| {title} | {author_npub} | {score_emoji} {score:.1f} | [📖]({url}) |\n"
                 report += f"\n*This report auto-published to Nostr via NIP-23 at 4 PM CT*\n"
             else:
                 report += "*No Nostr veins detected today — but the network never sleeps.*\n"
@@ -378,14 +380,44 @@ def generate_report_md(aggregated, insights, historical_context=None):
     report += "| **Vein Map** | Daily report structure |\n"
     report += "| **Dig In** | Link to source/details |\n\n"
 
-    # Add donation section with QR codes
+    # Add enhanced donation section with interactive elements
     report += "\n---\n\n## 💰 Support the Vein Network\n\n"
     report += "If Ollama Pulse helps you stay ahead of the ecosystem, consider supporting development:\n\n"
-    report += "**Ko-fi (Fiat/Card):** https://ko-fi.com/grumpified\n\n"
-    report += "![Ko-fi QR](../assets/KofiTipQR_Code_GrumpiFied.png)\n\n"
-    report += "**Lightning Network (Bitcoin):**\n\n"
-    report += "![Lightning QR](../assets/lightning_wallet_QR_Code.png)\n\n"
+
+    # Ko-fi section
+    report += "### ☕ Ko-fi (Fiat/Card)\n\n"
+    report += "**[💝 Tip on Ko-fi](https://ko-fi.com/grumpified)** | Scan QR Code Below\n\n"
+    report += "[![Ko-fi QR Code](../assets/KofiTipQR_Code_GrumpiFied.png)](https://ko-fi.com/grumpified)\n\n"
+    report += "*Click the QR code or button above to support via Ko-fi*\n\n"
+
+    # Lightning Network section with wallets
+    report += "### ⚡ Lightning Network (Bitcoin)\n\n"
+    report += "**Send Sats via Lightning:**\n\n"
+    report += "- [🔗 gossamerfalling850577@getalby.com](lightning:gossamerfalling850577@getalby.com)\n"
+    report += "- [🔗 havenhelpful360120@getalby.com](lightning:havenhelpful360120@getalby.com)\n\n"
+    report += "**Scan QR Code:**\n\n"
+    report += "[![Lightning QR Code](../assets/lightning_wallet_QR_Code.png)](lightning:gossamerfalling850577@getalby.com)\n\n"
+
+    # Why support section
+    report += "### 🎯 Why Support?\n\n"
+    report += "- **Keeps the project maintained and updated** — Daily ingestion, hourly pattern detection\n"
+    report += "- **Funds new data source integrations** — Expanding from 10 to 15+ sources\n"
+    report += "- **Supports open-source AI tooling** — All donations go to ecosystem projects\n"
+    report += "- **Enables Nostr decentralization** — Publishing to 8+ relays, NIP-23 long-form content\n\n"
+
     report += "*All donations support open-source AI tooling and ecosystem monitoring.*\n\n"
+
+    # Ko-fi widget script
+    report += "<!-- Ko-fi Floating Widget -->\n"
+    report += "<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>\n"
+    report += "<script>\n"
+    report += "  kofiWidgetOverlay.draw('grumpified', {\n"
+    report += "    'type': 'floating-chat',\n"
+    report += "    'floating-chat.donateButton.text': 'Tip EchoVein',\n"
+    report += "    'floating-chat.donateButton.background-color': '#8B0000',\n"
+    report += "    'floating-chat.donateButton.text-color': '#fff'\n"
+    report += "  });\n"
+    report += "</script>\n\n"
 
     report += "*Built by vein-tappers, for vein-tappers. Dig deeper. Ship harder.* ⛏️🩸\n"
 

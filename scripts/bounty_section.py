@@ -4,7 +4,7 @@ from datetime import datetime
 
 def load_bounties():
     today = datetime.now().strftime("%Y-%m-%d")
-    bounty_file = f"data/bounties/{today}.json"
+    bounty_file = f"../data/bounties/{today}.json"
     if not os.path.exists(bounty_file):
         return []
     with open(bounty_file, 'r', encoding='utf-8') as f:
