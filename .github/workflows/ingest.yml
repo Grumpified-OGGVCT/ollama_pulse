@@ -28,13 +28,15 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Run ingestion (parallel sources)
+      - name: Run ingestion (all 10 sources)
         run: |
           python scripts/ingest_official.py
           python scripts/ingest_cloud.py
           python scripts/ingest_community.py
           python scripts/ingest_issues.py
           python scripts/ingest_tools.py
+          python scripts/ingest_bounties.py
+          python scripts/ingest_nostr.py
 
       - name: Aggregate data
         run: python scripts/aggregate.py

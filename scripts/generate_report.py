@@ -20,12 +20,14 @@ except ImportError:
 
 DOCS_DIR = Path("../docs")
 REPORTS_DIR = DOCS_DIR / "reports"
+ROOT_REPORTS_DIR = Path("../reports")  # Root level reports directory
 
 
 def ensure_reports_dir():
-    """Create docs/reports directory if it doesn't exist"""
+    """Create docs/reports and root/reports directories if they don't exist"""
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    ROOT_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def get_today_date_str():
@@ -458,11 +460,17 @@ title: Pulse {today}
 
 """
 
-    # Save Markdown version
+    # Save Markdown version to docs/reports
     md_path = REPORTS_DIR / f"pulse-{today}.md"
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write(md_front_matter + report_md)
     print(f"💾 Saved Markdown report to {md_path}")
+
+    # Also save to root reports directory for backward compatibility
+    root_md_path = ROOT_REPORTS_DIR / f"pulse-{today}.md"
+    with open(root_md_path, 'w', encoding='utf-8') as f:
+        f.write(md_front_matter + report_md)
+    print(f"💾 Saved Markdown report to {root_md_path}")
 
     # Update index.html with Jekyll front matter
     index_front_matter = """---

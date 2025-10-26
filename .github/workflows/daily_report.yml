@@ -60,6 +60,16 @@ jobs:
           python generate_report.py
           echo "::notice::Report generated"
 
+      - name: Post report to Nostr
+        if: always()
+        env:
+          NOSTR_PRIVATE_KEY: ${{ secrets.NOSTR_PRIVATE_KEY }}
+        run: |
+          cd scripts
+          python post_to_nostr.py
+          echo "::notice::Report posted to Nostr"
+        continue-on-error: true
+
       - name: Commit and push report
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
