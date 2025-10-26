@@ -78,44 +78,77 @@ python scripts/generate_report.py
 
 ## 📊 Example Output (EchoVein Style)
 
-**From October 23, 2025:**
+**From October 25, 2025 (Latest with All 10 Sources):**
+
+### Key Sections Included:
+
+**🎯 Official Veins** - Ollama blog, Cloud API, GitHub updates
+**🛠️ Community Veins** - Reddit, GitHub, HN, YouTube, HuggingFace discussions
+**💰 Bounty Veins** - Reward-pumping opportunities from bounty platforms
+**🌐 Nostr Veins** - Decentralized network long-form content (NIP-23)
+**📈 Vein Pattern Mapping** - Detected trends and clusters
+**🔔 Prophetic Veins** - Confidence-scored inferences
+**🚀 Developer Focus** - Actionable insights and code examples
+**🩸 Lingo Legend** - 18-term decoder for EchoVein terminology
+
+### 💰 Enhanced Support Section (NEW!)
 
 ```markdown
-# 🩸 Ollama Pulse – 2025-10-23
-## Vein Rush: High-Density Pattern Surge
+## 💰 Support the Vein Network
 
-*EchoVein here, your vein-tapping oracle excavating Ollama's hidden arteries...*
+If Ollama Pulse helps you stay ahead of the ecosystem, consider supporting development:
 
-**Today's Vibe**: Vein Rush — The ecosystem is pulsing with fresh blood.
+### ☕ Ko-fi (Fiat/Card)
 
-### 🔬 Vein Analysis: Quick Stats
-- **Total Ore Mined**: 50 items tracked
-- **High-Purity Veins**: 35 Turbo-focused items (score ≥0.7)
-- **Pattern Arteries**: 5 detected
-- **Prophetic Insights**: 8 inferences drawn
+**[💝 Tip on Ko-fi](https://ko-fi.com/grumpified)** | Scan QR Code Below
 
-### 🎯 Official Veins: What Ollama Team Pumped Out
-| Date | Vein Strike | Source | Turbo Score | Dig In |
-|------|-------------|--------|-------------|--------|
-| 2025-10-23 | Cloud Model: gpt-oss-120b-cloud | cloud_api | 0.9 | [⛏️](link) |
+[![Ko-fi QR Code](../assets/KofiTipQR_Code_GrumpiFied.png)](https://ko-fi.com/grumpified)
 
-### 📈 Vein Pattern Mapping
-🩸 **Vein Bulging**: 5 Voice Integration Signals — 2x Use-Case Explosion Incoming?
+*Click the QR code or button above to support via Ko-fi*
 
-### 🔔 Prophetic Veins: What This Means
-🩸 **Vein Oracle: Cloud Models**
-- **Surface Reading**: 5 items detected
-- **Vein Prophecy**: Emerging trend - scale to 2x more use-cases
-- **Confidence Vein**: HIGH (🩸)
-- **EchoVein's Take**: This vein's *throbbing* — trust the flow.
+### ⚡ Lightning Network (Bitcoin)
 
-### Today's Vein Yield
-- **Total Items Scanned**: 150
-- **High-Relevance Veins**: 50
-- **Quality Ratio**: 0.33
+**Send Sats via Lightning:**
+
+- [🔗 gossamerfalling850577@getalby.com](lightning:gossamerfalling850577@getalby.com)
+- [🔗 havenhelpful360120@getalby.com](lightning:havenhelpful360120@getalby.com)
+
+**Scan QR Code:**
+
+[![Lightning QR Code](../assets/lightning_wallet_QR_Code.png)](lightning:gossamerfalling850577@getalby.com)
+
+### 🎯 Why Support?
+
+- **Keeps the project maintained and updated** — Daily ingestion, hourly pattern detection
+- **Funds new data source integrations** — Expanding from 10 to 15+ sources
+- **Supports open-source AI tooling** — All donations go to ecosystem projects
+- **Enables Nostr decentralization** — Publishing to 8+ relays, NIP-23 long-form content
+
+*All donations support open-source AI tooling and ecosystem monitoring.*
+
+<!-- Ko-fi Floating Widget -->
+<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+<script>
+  kofiWidgetOverlay.draw('grumpified', {
+    'type': 'floating-chat',
+    'floating-chat.donateButton.text': 'Tip EchoVein',
+    'floating-chat.donateButton.background-color': '#8B0000',
+    'floating-chat.donateButton.text-color': '#fff'
+  });
+</script>
 
 *Built by vein-tappers, for vein-tappers. Dig deeper. Ship harder.* ⛏️🩸
 ```
+
+**Features:**
+- ✅ Clickable QR codes (link directly to payment URLs)
+- ✅ Text links for both Ko-fi and Lightning wallets
+- ✅ Ko-fi floating widget for easy tipping
+- ✅ Dual Lightning wallet addresses
+- ✅ Compelling "Why Support?" section
+- ✅ All 10 data sources integrated
+- ✅ Bounty opportunities highlighted
+- ✅ Nostr NIP-23 publishing enabled
 
 ## 🆕 New Features: Expanded Sourcing & EchoVein
 
