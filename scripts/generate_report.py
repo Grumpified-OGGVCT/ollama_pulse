@@ -565,19 +565,20 @@ The ecosystem shows {"strong convergence around key areas" if len(high_turbo) >=
     report += "\n---\n\n## 💰 Support the Vein Network\n\n"
     report += "If Ollama Pulse helps you stay ahead of the ecosystem, consider supporting development:\n\n"
 
-    # Ko-fi section
+    # Ko-fi section with properly sized QR code
     report += "### ☕ Ko-fi (Fiat/Card)\n\n"
     report += "**[💝 Tip on Ko-fi](https://ko-fi.com/grumpified)** | Scan QR Code Below\n\n"
-    report += "[![Ko-fi QR Code](../assets/KofiTipQR_Code_GrumpiFied.png)](https://ko-fi.com/grumpified)\n\n"
+    report += '<a href="https://ko-fi.com/grumpified"><img src="../assets/KofiTipQR_Code_GrumpiFied.png" alt="Ko-fi QR Code" width="200" height="200" /></a>\n\n'
     report += "*Click the QR code or button above to support via Ko-fi*\n\n"
 
-    # Lightning Network section with wallets
+    # Lightning Network section with both wallets and QR codes
     report += "### ⚡ Lightning Network (Bitcoin)\n\n"
     report += "**Send Sats via Lightning:**\n\n"
     report += "- [🔗 gossamerfalling850577@getalby.com](lightning:gossamerfalling850577@getalby.com)\n"
     report += "- [🔗 havenhelpful360120@getalby.com](lightning:havenhelpful360120@getalby.com)\n\n"
-    report += "**Scan QR Code:**\n\n"
-    report += "[![Lightning QR Code](../assets/lightning_wallet_QR_Code.png)](lightning:gossamerfalling850577@getalby.com)\n\n"
+    report += "**Scan QR Codes:**\n\n"
+    report += '<a href="lightning:gossamerfalling850577@getalby.com"><img src="../assets/lightning_wallet_QR_Code.png" alt="Lightning Wallet 1 QR Code" width="200" height="200" /></a> '
+    report += '<a href="lightning:havenhelpful360120@getalby.com"><img src="../assets/lightning_wallet_QR_Code_2.png" alt="Lightning Wallet 2 QR Code" width="200" height="200" /></a>\n\n'
 
     # Why support section
     report += "### 🎯 Why Support?\n\n"
