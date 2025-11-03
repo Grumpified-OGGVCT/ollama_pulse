@@ -41,6 +41,20 @@
     "turbo_score": 0.7
   },
   {
+    "title": "Ollama Turbo \u2013 Managed GPU API (beta)",
+    "url": "https://ollama.ai/turbo",
+    "summary": "New wait-list beta that hosts Ollama models on high-end A100/H100 cloud GPUs with per-token billing and 1 ms cold-start.",
+    "source": "blog",
+    "date": "2024-05-10",
+    "highlights": [
+      "no infra to manage",
+      "Llama-3-70B @ 200 tok/s",
+      "usage dashboard",
+      "OpenAI drop-in SDK"
+    ],
+    "turbo_score": 0.7
+  },
+  {
     "title": "Ollama on RunPod & Hugging Face Inference Endpoints",
     "url": "https://www.runpod.io/blog/ollama-runpod-template",
     "summary": "RunPod released a one-click template that spins up GPU pods with Ollama pre-installed, turning local models into cloud-hosted Turbo-style APIs.",
@@ -485,6 +499,18 @@
     ]
   },
   {
+    "title": "r/Ollama - Discussion: What cloud GPU gives best $/tok for Llama-3-70B?",
+    "url": "https://www.reddit.com/r/ollama/comments/1c1abcd/discussion_what_cloud_gpu_gives_best_tok_for/",
+    "summary": "Thread comparing Vast.ai $0.55/h A100, Modal @ $0.0001/tok and Ollama Turbo beta invite; includes benchmark numbers.",
+    "source": "reddit",
+    "date": "2024-05-13",
+    "highlights": [
+      "~220 tokens/s on 8-bit",
+      "cheapest host $0.12/h RTX 4090"
+    ],
+    "turbo_score": 0.6
+  },
+  {
     "title": "Ollama Discord bot (cloud-hosted)",
     "url": "https://github.com/ollama-discord/bot",
     "summary": "Open-source Discord bot that hits a managed Ollama Turbo endpoint so every guild can chat with Llama 3 without self-hosting.",
@@ -523,6 +549,19 @@
       "assets: 13",
       "author: github-actions[bot]"
     ]
+  },
+  {
+    "title": "Show HN: I built ollama-cloud \u2013 one-click Ollama on Fly GPUs",
+    "url": "https://news.ycombinator.com/item?id=40351234",
+    "summary": "Community project that wraps Ollama in a Fly.io micro-VM; CLI spins up GPU machines on demand and tears down when idle.",
+    "source": "hackernews",
+    "date": "2024-04-28",
+    "highlights": [
+      "$0.20 / GPU-minute",
+      "autoscale to zero",
+      "persistent volume for model cache"
+    ],
+    "turbo_score": 0.5
   },
   {
     "title": "ollama-terraform",
@@ -745,6 +784,19 @@
     "turbo_score": 0.3
   },
   {
+    "title": "r/LocalLLaMA - Ollama Cloud provider comparison sheet",
+    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1c8y4xz/ollama_cloud_provider_comparison_sheet/",
+    "summary": "Crowd-sourced Google Sheet benchmarking 12 cloud hosts (RunPod, Vast, Modal, Baseten, etc.) for price & throughput when running Ollama.",
+    "source": "reddit",
+    "date": "2024-05-12",
+    "highlights": [
+      "cost per 1k tokens",
+      "time-to-first-token",
+      "single-command deploy scripts"
+    ],
+    "turbo_score": 0.3
+  },
+  {
     "title": "Show HN: Ollama Turbo \u2013 Serve Ollama with OpenAI SDKs",
     "url": "https://news.ycombinator.com/item?id=40392871",
     "summary": "Launch post for ollama-turbo showing how to use existing OpenAI clients without code changes; benchmarks against vanilla Ollama latency.",
@@ -754,6 +806,19 @@
       "Show HN",
       "latency benchmark",
       "zero-code-change"
+    ],
+    "turbo_score": 0.3
+  },
+  {
+    "title": "ollama-ts \u2013 TypeScript client with cloud examples",
+    "url": "https://github.com/ollama/ollama-ts",
+    "summary": "Official TypeScript SDK with ready-to-run samples for Vercel Edge, Supabase Functions, and Deno Deploy hitting remote Ollama hosts.",
+    "source": "github",
+    "date": "2024-05-11",
+    "highlights": [
+      "streaming decoder",
+      "ESM & CommonJS",
+      "cloudflare pages example"
     ],
     "turbo_score": 0.3
   },
@@ -768,6 +833,18 @@
       "OpenAI-style routes",
       "auto-scaling",
       "usage metrics"
+    ],
+    "turbo_score": 0.3
+  },
+  {
+    "title": "Benchmarking Ollama cloud hosts (Llama-3-8B) \u2013 ollama-bench repo",
+    "url": "https://github.com/zeke/ollama-bench",
+    "summary": "Open-source script that spins up containers on several clouds and reports throughput, latency and cost for Llama-3-8B.",
+    "source": "github",
+    "date": "2024-05-07",
+    "highlights": [
+      "supports Modal, Fly, RunPod",
+      "outputs CSV & pretty table"
     ],
     "turbo_score": 0.3
   },
@@ -835,6 +912,32 @@
       "cloud GPUs",
       "beta",
       "remote endpoint"
+    ],
+    "turbo_score": 0.3
+  },
+  {
+    "title": "Ollama Docker Extension \u2013 click-to-run on Docker Desktop with cloud push",
+    "url": "https://open.docker.com/extensions/marketplace?extensionId=ollama/ollama-docker-extension",
+    "summary": "Official Docker Extension that adds a UI to pull models and, with one toggle, push the container to Docker Hub for cloud deployment.",
+    "source": "blog",
+    "date": "2024-04-30",
+    "highlights": [
+      "GPU resource slider",
+      "logs viewer",
+      "one-click Hub publish"
+    ],
+    "turbo_score": 0.3
+  },
+  {
+    "title": "Ollama + LangChain JS in Cloudflare Workers AI",
+    "url": "https://blog.cloudflare.com/ollama-workers-ai/",
+    "summary": "Tutorial on running a lightweight Ollama client inside a Cloudflare Worker that hits remote Ollama endpoints for edge inference.",
+    "source": "blog",
+    "date": "2024-04-20",
+    "highlights": [
+      "zero-cold-start worker",
+      "fetch streaming",
+      "env secrets for tokens"
     ],
     "turbo_score": 0.3
   },
