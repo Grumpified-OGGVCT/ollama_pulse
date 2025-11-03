@@ -1,30 +1,27 @@
 [
   {
-    "title": "ollama/ollama",
+    "title": "ollama/ollama \u2013 GitHub",
     "url": "https://github.com/ollama/ollama",
-    "summary": "Official repo for Ollama \u2013 get up and running with Llama 3, Mistral, Gemma and other large language models locally; includes CLI, REST API and Docker images.",
+    "summary": "Official repo for Ollama: run Llama 3, Mistral, Gemma and other large language models locally with a single command. Includes Docker image and REST API.",
     "source": "github",
-    "date": "2024-05-14",
+    "date": "2024-05-15",
     "highlights": [
-      "self-hosted",
+      "docker",
       "REST API",
-      "Docker",
-      "Modelfile",
-      "GGUF"
+      "local inference",
+      "Modelfile"
     ]
   },
   {
-    "title": "ollama-webui/ollama-webui",
+    "title": "Ollama WebUI \u2013 intuitive browser interface",
     "url": "https://github.com/ollama-webui/ollama-webui",
-    "summary": "ChatGPT-style web UI for any Ollama model; one-command Docker run, multi-model chats, code-highlighting, dark/light themes.",
+    "summary": "Self-hosted ChatGPT-like UI that talks to any Ollama endpoint (local or cloud) via JS fetch, supports multi-model chats and markdown export.",
     "source": "github",
-    "date": "2024-05-10",
+    "date": "2024-05-13",
     "highlights": [
-      "web UI",
-      "Docker",
-      "multi-model",
-      "markdown",
-      "dark theme"
+      "ChatGPT-like",
+      "markdown export",
+      "multi-model"
     ]
   },
   {
@@ -132,16 +129,15 @@
     ]
   },
   {
-    "title": "Ollama Model Library registry",
+    "title": "Ollama Model Library \u2013 official registry",
     "url": "https://ollama.com/library",
-    "summary": "Official registry listing all pull-able models (Llama 3, Phi-3, Mistral, CodeLlama, etc.) with tags, sizes, and one-line run commands.",
+    "summary": "Curated registry of 100+ ready-to-run GGUF models (Llama 3, Phi-3, Mistral, CodeLlama, etc.) with one-line pull commands and parameter notes.",
     "source": "blog",
-    "date": "2024-05-13",
+    "date": "2024-05-14",
     "highlights": [
-      "modelfile specs",
-      "quantization sizes",
-      "SHA256 checksums",
-      "community uploads"
+      "GGUF",
+      "one-line pull",
+      "100+ models"
     ]
   },
   {
@@ -160,27 +156,25 @@
   {
     "title": "Ollama Python & JavaScript libraries",
     "url": "https://github.com/ollama/ollama-python",
-    "summary": "Official lightweight SDKs to pull and chat with Ollama models from Python or Node; supports streaming, embeddings, custom options.",
+    "summary": "Official PyPI package to pull, push and chat with any Ollama model from Python; includes async client and streaming support.",
     "source": "github",
     "date": "2024-05-12",
     "highlights": [
-      "pip install ollama",
-      "npm ollama",
-      "streaming",
-      "embeddings"
+      "PyPI",
+      "async",
+      "streaming"
     ]
   },
   {
-    "title": "Ollama-js \u2013 browser & Node client",
+    "title": "Ollama-js \u2013 npm wrapper",
     "url": "https://github.com/ollama/ollama-js",
-    "summary": "Official JavaScript/TypeScript client that runs in Node or the browser and can target a cloud-hosted Ollama endpoint via CORS proxies.",
+    "summary": "Official npm package providing the same API surface as the Python client for Node/Browser use, works against local or cloud endpoints.",
     "source": "github",
-    "date": "2024-05-06",
+    "date": "2024-05-09",
     "highlights": [
-      "browser support",
-      "CORS proxy notes",
-      "streaming fetch",
-      "types included"
+      "npm",
+      "browser",
+      "cloud endpoint"
     ]
   },
   {
@@ -236,17 +230,15 @@
     ]
   },
   {
-    "title": "Ollama Helm chart for Kubernetes",
+    "title": "Ollama Helm Chart for Kubernetes",
     "url": "https://github.com/otwld/ollama-helm",
-    "summary": "Production-ready Helm chart to deploy Ollama on any K8s cluster with GPU node-selector, PVC and autoscaling support.",
+    "summary": "Production-ready Helm chart with autoscaling, PVC, and optional cloud GPU node-affinity for running Ollama in k8s clusters.",
     "source": "github",
-    "date": "2024-05-09",
+    "date": "2024-05-01",
     "highlights": [
-      "Kubernetes",
       "Helm",
-      "GPU",
-      "autoscale",
-      "PVC"
+      "autoscaling",
+      "GPU node-affinity"
     ]
   },
   {
@@ -312,6 +304,114 @@
       "Claude Desktop",
       "open protocol",
       "experimental"
+    ]
+  },
+  {
+    "title": "Ollama now supports running models on remote GPUs (beta cloud)",
+    "url": "https://github.com/ollama/ollama/releases/tag/v0.1.38",
+    "summary": "Release notes for v0.1.38 introducing experimental cloud-hosted GPU runners; point local CLI to remote endpoint for accelerated inference.",
+    "source": "github",
+    "date": "2024-04-30",
+    "highlights": [
+      "cloud GPUs",
+      "beta",
+      "remote endpoint"
+    ]
+  },
+  {
+    "title": "Turbo API wrapper for Ollama \u2013 ollama-turbo",
+    "url": "https://github.com/sammcj/ollama-turbo",
+    "summary": "Lightweight Python/fastapi proxy that adds OpenAI-compatible /v1/chat/completions endpoint on top of Ollama for easier drop-in replacement.",
+    "source": "github",
+    "date": "2024-05-10",
+    "highlights": [
+      "OpenAI-compatible",
+      "fastapi",
+      "drop-in"
+    ]
+  },
+  {
+    "title": "Ollama Cloud Mode \u2013 Reddit discussion",
+    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1c6z3rj/ollama_cloud_mode_beta/",
+    "summary": "Community thread sharing first impressions of the new cloud-GPU beta, cost vs self-host, and sample docker-compose for remote workers.",
+    "source": "reddit",
+    "date": "2024-05-02",
+    "highlights": [
+      "cost discussion",
+      "docker-compose",
+      "beta feedback"
+    ]
+  },
+  {
+    "title": "Show HN: Ollama Turbo \u2013 Serve Ollama with OpenAI SDKs",
+    "url": "https://news.ycombinator.com/item?id=40392871",
+    "summary": "Launch post for ollama-turbo showing how to use existing OpenAI clients without code changes; benchmarks against vanilla Ollama latency.",
+    "source": "hackernews",
+    "date": "2024-05-11",
+    "highlights": [
+      "Show HN",
+      "latency benchmark",
+      "zero-code-change"
+    ]
+  },
+  {
+    "title": "LangChain Ollama integration docs",
+    "url": "https://python.langchain.com/docs/integrations/llms/ollama/",
+    "summary": "Step-by-step guide to plug Ollama (local or cloud) into LangChain pipelines using the Ollama LLM wrapper and chat model interface.",
+    "source": "blog",
+    "date": "2024-05-08",
+    "highlights": [
+      "LangChain",
+      "pipelines",
+      "chat model"
+    ]
+  },
+  {
+    "title": "LlamaIndex Ollama connector",
+    "url": "https://docs.llamaindex.ai/en/stable/examples/llm/ollama/",
+    "summary": "Example notebooks showing how to use Ollama as the LLM backend for LlamaIndex retrieval-augmented-generation workflows.",
+    "source": "blog",
+    "date": "2024-05-07",
+    "highlights": [
+      "RAG",
+      "notebooks",
+      "retrieval"
+    ]
+  },
+  {
+    "title": "Deploy Ollama on Fly.io \u2013 community guide",
+    "url": "https://github.com/fly-apps/ollama-fly",
+    "summary": "Repo + blog post detailing how to run Ollama on Fly Machines with GPU support, persistent volumes, and WireGuard peer access.",
+    "source": "github",
+    "date": "2024-04-25",
+    "highlights": [
+      "Fly.io",
+      "GPU",
+      "WireGuard"
+    ]
+  },
+  {
+    "title": "Benchmarking Ollama cloud GPUs vs RTX 4090 \u2013 YouTube",
+    "url": "https://www.youtube.com/watch?v=8Kp6RzypR1U",
+    "summary": "15-min video comparing tokens/sec and cost between Ollama\u2019s new cloud GPUs and a local RTX 4090 box for Llama-3-70B.",
+    "source": "youtube",
+    "date": "2024-05-06",
+    "highlights": [
+      "tokens/sec",
+      "cost analysis",
+      "Llama-3-70B"
+    ]
+  },
+  {
+    "title": "Ollama Modelfile deep-dive \u2013 creating custom models",
+    "url": "https://github.com/ollama/ollama/blob/main/docs/modelfile.md",
+    "summary": "Official documentation explaining how to write a Modelfile to bundle weights, system prompts, temperature and tensor-split options for sharing.",
+    "source": "github",
+    "date": "2024-05-09",
+    "highlights": [
+      "Modelfile",
+      "system prompt",
+      "tensor-split"
     ]
   }
 ]
