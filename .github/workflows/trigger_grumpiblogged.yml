@@ -12,20 +12,48 @@ on:
         description: 'Force trigger GrumpiBlogged'
         required: false
         default: 'false'
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trigger-grumpiblogged
+  cancel-in-progress: true
 
 jobs:
   notify-grumpiblogged:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Validate webhook secret
+        run: |
+          if [ -z "${{ secrets.GRUMPIBLOGGED_PAT }}" ]; then
+            echo "::warning::GRUMPIBLOGGED_PAT not configured - webhook will not be sent"
+            echo "::notice::To enable GrumpiBlogged integration, add GRUMPIBLOGGED_PAT secret"
+            echo "skip_webhook=true" >> $GITHUB_ENV
+          else
+            echo "::notice::GRUMPIBLOGGED_PAT configured - webhook enabled"
+            echo "skip_webhook=false" >> $GITHUB_ENV
+          fi
       
       - name: Get latest report info
+        if: env.skip_webhook == 'false'
         id: report_info
         run: |
-          # Get the most recent report file
-          LATEST_REPORT=$(ls -t docs/reports/pulse-*.md | head -1)
+          LATEST_REPORT=$(ls -t docs/reports/pulse-*.md 2>/dev/null | head -1)
+          
+          if [ -z "$LATEST_REPORT" ]; then
+            echo "::error::No report files found"
+            exit 1
+          fi
+          
           REPORT_DATE=$(basename "$LATEST_REPORT" .md | sed 's/pulse-//')
           REPORT_URL="https://grumpified-oggvct.github.io/ollama_pulse/reports/$(basename "$LATEST_REPORT" .md)"
           
@@ -33,11 +61,15 @@ jobs:
           echo "report_date=$REPORT_DATE" >> $GITHUB_OUTPUT
           echo "report_url=$REPORT_URL" >> $GITHUB_OUTPUT
           
-          # Extract first 200 chars for description
-          DESCRIPTION=$(head -20 "$LATEST_REPORT" | grep -v "^---" | grep -v "^#" | grep -v "^<" | head -5 | tr '\n' ' ' | cut -c1-200)
+          # Extract description (skip front matter and headers)
+          DESCRIPTION=$(grep -v '^---' "$LATEST_REPORT" | grep -v '^#' | grep -v '^<' | grep -v '^$' | head -10 | tr '\n' ' ' | cut -c1-200)
           echo "description=$DESCRIPTION" >> $GITHUB_OUTPUT
+          
+          echo "::notice::Report: $REPORT_DATE"
+          echo "::notice::URL: $REPORT_URL"
       
       - name: Trigger GrumpiBlogged workflow
+        if: env.skip_webhook == 'false'
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.GRUMPIBLOGGED_PAT }}
@@ -54,9 +86,18 @@ jobs:
             }
       
       - name: Log webhook trigger
+        if: env.skip_webhook == 'false'
         run: |
-          echo "✅ Triggered GrumpiBlogged meta-report aggregation"
-          echo "📅 Report Date: ${{ steps.report_info.outputs.report_date }}"
-          echo "🔗 Report URL: ${{ steps.report_info.outputs.report_url }}"
-          echo "📝 Description: ${{ steps.report_info.outputs.description }}"
-
+          echo "### ✅ GrumpiBlogged Webhook Sent" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Report Date**: ${{ steps.report_info.outputs.report_date }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Report URL**: ${{ steps.report_info.outputs.report_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Description**: ${{ steps.report_info.outputs.description }}" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Log webhook skip
+        if: env.skip_webhook == 'true'
+        run: |
+          echo "### ⚠️ Webhook Skipped" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "GRUMPIBLOGGED_PAT secret not configured." >> $GITHUB_STEP_SUMMARY
+          echo "Add the secret in repository settings to enable integration." >> $GITHUB_STEP_SUMMARY

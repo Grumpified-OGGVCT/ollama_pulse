@@ -1,4 +1,9 @@
-name: Reusable Ingestion Workflow
+# ARCHIVED: This workflow was never used and has been replaced by matrix strategy in ingest.yml
+# Kept for reference only - DO NOT USE
+# Archived: 2025-11-02
+# Reason: Redundant - matrix strategy in ingest.yml provides same functionality with better parallelization
+
+name: Reusable Ingestion Workflow (ARCHIVED - DO NOT USE)
 
 on:
   workflow_call:
@@ -24,3 +29,4 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "data(${{ inputs.source_name }}): automated ingestion"
+
