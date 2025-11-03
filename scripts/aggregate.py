@@ -126,8 +126,25 @@ def aggregate_data():
     all_entries = (official + community + tools + bounties + nostr +
                    stackoverflow + models + releases + devblogs + discord + manual)
     
-    # Deduplicate by URL
-    unique_entries = list({e['url']: e for e in all_entries}.values())
+    # Deduplicate by URL (handle entries without URL gracefully)
+    unique_dict = {}
+    entries_without_url = []
+    
+    for e in all_entries:
+        if 'url' in e and e['url']:
+            # Use URL as deduplication key
+            unique_dict[e['url']] = e
+        else:
+            # Entry missing URL - use title as fallback or keep as-is
+            fallback_key = e.get('title', f"no_url_{len(entries_without_url)}")
+            if fallback_key not in unique_dict:
+                unique_dict[fallback_key] = e
+                entries_without_url.append(e)
+    
+    unique_entries = list(unique_dict.values())
+    
+    if entries_without_url:
+        print(f"⚠️  Warning: {len(entries_without_url)} entries missing URL field (using title as fallback)")
     
     # Apply Turbo-centric filtering
     print("🎯 Applying Turbo-centric relevance filtering...")
