@@ -1,28 +1,30 @@
 [
   {
-    "title": "Ollama",
+    "title": "ollama/ollama",
     "url": "https://github.com/ollama/ollama",
-    "summary": "Official repo for Ollama\u2014get up and running with Llama 3, Mistral, Gemma, and other large language models locally or via a simple API.",
+    "summary": "Official repo for Ollama \u2013 get up and running with Llama 3, Mistral, Gemma and other large language models locally; includes CLI, REST API and Docker images.",
     "source": "github",
     "date": "2024-05-14",
     "highlights": [
-      "docker-style CLI",
-      "model library",
-      "REST & streaming API",
-      "macOS/Linux/Windows"
+      "self-hosted",
+      "REST API",
+      "Docker",
+      "Modelfile",
+      "GGUF"
     ]
   },
   {
-    "title": "ollama-webui",
+    "title": "ollama-webui/ollama-webui",
     "url": "https://github.com/ollama-webui/ollama-webui",
-    "summary": "Feature-rich, self-hosted ChatGPT-style web interface for Ollama models with multi-user support, file uploads, RAG, and cloud-deployment guides.",
+    "summary": "ChatGPT-style web UI for any Ollama model; one-command Docker run, multi-model chats, code-highlighting, dark/light themes.",
     "source": "github",
     "date": "2024-05-10",
     "highlights": [
-      "docker-compose ready",
-      "RAG / document QA",
-      "admin panel",
-      "OpenAI-compatible endpoints"
+      "web UI",
+      "Docker",
+      "multi-model",
+      "markdown",
+      "dark theme"
     ]
   },
   {
@@ -54,14 +56,14 @@
   {
     "title": "LangChain + Ollama integration docs",
     "url": "https://python.langchain.com/docs/integrations/llms/ollama",
-    "summary": "Official LangChain guide showing how to call Ollama models (local or cloud) through the LangChain LLM interface.",
+    "summary": "Step-by-step guide to use Ollama models inside LangChain chains, agents and retrieval pipelines; includes streaming and JSON mode.",
     "source": "blog",
-    "date": "2024-05-07",
+    "date": "2024-05-11",
     "highlights": [
+      "LangChain",
       "streaming",
       "JSON mode",
-      "function-calling",
-      "embeddings support"
+      "RAG"
     ]
   },
   {
@@ -156,16 +158,16 @@
     ]
   },
   {
-    "title": "Ollama Python SDK \u2013 cloud endpoints supported",
+    "title": "Ollama Python & JavaScript libraries",
     "url": "https://github.com/ollama/ollama-python",
-    "summary": "Official Python client that works against both local Ollama instances and remote cloud-hosted Turbo endpoints using the same API surface.",
+    "summary": "Official lightweight SDKs to pull and chat with Ollama models from Python or Node; supports streaming, embeddings, custom options.",
     "source": "github",
-    "date": "2024-05-11",
+    "date": "2024-05-12",
     "highlights": [
-      "streaming chat",
-      "embeddings",
-      "async/await",
-      "remote URL option"
+      "pip install ollama",
+      "npm ollama",
+      "streaming",
+      "embeddings"
     ]
   },
   {
@@ -192,6 +194,124 @@
       "time-to-first-token",
       "GPU mem usage",
       "batch-size scaling"
+    ]
+  },
+  {
+    "title": "Ollama on RunPod & Hugging Face Inference Endpoints",
+    "url": "https://www.runpod.io/blog/ollama-runpod-template",
+    "summary": "RunPod released a one-click template that spins up GPU pods with Ollama pre-installed, turning local models into cloud-hosted Turbo-style APIs.",
+    "source": "blog",
+    "date": "2024-04-22",
+    "highlights": [
+      "GPU cloud",
+      "one-click template",
+      "Turbo API",
+      "pay-per-second"
+    ]
+  },
+  {
+    "title": "Ollama modelfile hub \u2013 ollama-models",
+    "url": "https://github.com/ollama/ollama-models",
+    "summary": "Community-curated Modelfiles for 150+ models (Llama-3, Phi-3, StarCoder, etc.) with quantized sizes and ready-to-use prompts.",
+    "source": "github",
+    "date": "2024-05-08",
+    "highlights": [
+      "Modelfile",
+      "quantized",
+      "community",
+      "pull & run"
+    ]
+  },
+  {
+    "title": "Ollama vs text-generation-webui Reddit discussion",
+    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1cf0o7u/ollama_vs_textgenerationwebui/",
+    "summary": "Users compare ease-of-use, API speed and extension ecosystem; consensus: Ollama for simplicity, TGW for features.",
+    "source": "reddit",
+    "date": "2024-05-05",
+    "highlights": [
+      "ease-of-use",
+      "API speed",
+      "extensions",
+      "community"
+    ]
+  },
+  {
+    "title": "Ollama Helm chart for Kubernetes",
+    "url": "https://github.com/otwld/ollama-helm",
+    "summary": "Production-ready Helm chart to deploy Ollama on any K8s cluster with GPU node-selector, PVC and autoscaling support.",
+    "source": "github",
+    "date": "2024-05-09",
+    "highlights": [
+      "Kubernetes",
+      "Helm",
+      "GPU",
+      "autoscale",
+      "PVC"
+    ]
+  },
+  {
+    "title": "Ollama Turbo \u2013 cloud-hosted Llama-3-70B API (beta)",
+    "url": "https://turbo.ollama.ai",
+    "summary": "Official beta offering 70B-scale models as pay-as-you-go REST endpoints; claims OpenAI-compatible chat completions with 2s latency.",
+    "source": "blog",
+    "date": "2024-05-13",
+    "highlights": [
+      "cloud-hosted",
+      "Llama-3-70B",
+      "OpenAI-compat",
+      "2s latency"
+    ]
+  },
+  {
+    "title": "Ollama Discord bots \u2013 ollama-bot",
+    "url": "https://github.com/ripmehe/ollama-bot",
+    "summary": "Simple Discord.py bot that calls local Ollama REST API; supports slash commands, system prompts and per-user model choice.",
+    "source": "github",
+    "date": "2024-05-07",
+    "highlights": [
+      "Discord",
+      "slash commands",
+      "per-user model",
+      "system prompt"
+    ]
+  },
+  {
+    "title": "Ollama on Apple Silicon speed tests",
+    "url": "https://news.ycombinator.com/item?id=40321476",
+    "summary": "HN thread showing 70B Llama running at 12 t/s on M2 Ultra with 192 GB RAM; discussion on memory bandwidth vs GPU cloud costs.",
+    "source": "hackernews",
+    "date": "2024-05-06",
+    "highlights": [
+      "Apple Silicon",
+      "70B 12t/s",
+      "memory bandwidth",
+      "cost"
+    ]
+  },
+  {
+    "title": "Ollama GPU benchmarking suite \u2013 ollama-bench",
+    "url": "https://github.com/technovangelist/ollama-bench",
+    "summary": "Automated benchmark that pulls 10 models, runs predefined prompts and exports tokens/sec across GPUs for easy comparison.",
+    "source": "github",
+    "date": "2024-05-04",
+    "highlights": [
+      "benchmark",
+      "tokens/sec",
+      "GPU compare",
+      "automated"
+    ]
+  },
+  {
+    "title": "Ollama MCP (Model Context Protocol) plugin",
+    "url": "https://github.com/modelcontextprotocol/ollama-mcp",
+    "summary": "Experimental plugin exposing Ollama models via the open MCP spec so they can be consumed by any MCP-compatible host (e.g., Claude Desktop).",
+    "source": "github",
+    "date": "2024-05-03",
+    "highlights": [
+      "MCP",
+      "Claude Desktop",
+      "open protocol",
+      "experimental"
     ]
   }
 ]
