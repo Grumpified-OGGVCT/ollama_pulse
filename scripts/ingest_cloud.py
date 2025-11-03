@@ -162,17 +162,12 @@ def main():
     print("🚀 Starting cloud sources deep ingestion...")
     ensure_data_dir()
 
-    # PRIMARY: Try Ollama web_search first
-    web_search_entries = asyncio.run(fetch_via_web_search(filter_type=args.filter))
-
-    # FALLBACK: Use direct scraping if web_search failed or returned few results
-    if len(web_search_entries) < 5:
-        print("📡 FALLBACK: Using direct scraping...")
-        cloud_entries = fetch_ollama_tags(filter_type=args.filter, depth=args.depth)
-        all_entries = web_search_entries + cloud_entries
-    else:
-        print("✅ Web search provided sufficient results, skipping fallback")
-        all_entries = web_search_entries
+    # PRIMARY: Use DIRECT API (no LLM hallucinations!)
+    print("📡 PRIMARY: Using REAL Ollama /api/tags for FACTUAL cloud models...")
+    cloud_entries = fetch_ollama_tags(filter_type=args.filter, depth=args.depth)
+    all_entries = cloud_entries
+    
+    print(f"✅ Collected {len(all_entries)} VERIFIED cloud models from API")
 
     # Save
     save_data(all_entries)

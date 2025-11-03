@@ -282,27 +282,33 @@ Commentary: {commentary or 'No commentary available'}
     def generate_prophecy(self, cluster_summary: str, past_yield: Dict, use_rag: bool = True) -> Dict:
         """Generate prophecy with RAG-enhanced context using Ollama Cloud"""
         if not self.llm:
+            print("⚠️  LLM not initialized - skipping prophecy")
             return {"prophecy": "Ollama client not initialized", "confidence": "UNAVAILABLE"}
 
         try:
             # Build context from vector store if RAG enabled
             rag_context = ""
             if use_rag and self.vectorstore:
-                # Query for relevant historical patterns
-                results = self.vectorstore.similarity_search(
-                    cluster_summary,
-                    k=5
-                )
+                try:
+                    # Query for relevant historical patterns
+                    results = self.vectorstore.similarity_search(
+                        cluster_summary,
+                        k=5
+                    )
 
-                if results:
-                    rag_context = "\n\n**Historical Context:**\n"
-                    for i, doc in enumerate(results, 1):
-                        rag_context += f"\n{i}. {doc.page_content.strip()}\n"
+                    if results:
+                        rag_context = "\n\n**Historical Context:**\n"
+                        for i, doc in enumerate(results, 1):
+                            rag_context += f"\n{i}. {doc.page_content.strip()}\n"
+                        print(f"✅ RAG context retrieved: {len(results)} documents")
+                except Exception as rag_error:
+                    print(f"⚠️  RAG query failed: {rag_error} - proceeding without historical context")
+                    rag_context = ""
 
             # Build prompt (official Ollama API format per docs.ollama.com/cloud)
             prompt = f"""You are EchoVein, the vein-tapping oracle of the Ollama ecosystem.
 
-Based on the following cluster analysis and historical context, generate a brief prophecy about where the ecosystem is heading.
+Based on the following cluster analysis, generate a brief prophecy about where the ecosystem is heading.
 
 **Current Cluster Summary:**
 {cluster_summary}
@@ -317,6 +323,8 @@ Focus on actionable predictions and emerging patterns.
 
 Prophecy:"""
 
+            print(f"🔮 Generating prophecy with {self.model}...")
+            
             # Generate using official Ollama client (per docs.ollama.com/cloud)
             response = self.llm.chat(
                 model=self.model,
@@ -329,6 +337,7 @@ Prophecy:"""
 
             # Extract prophecy text from response
             prophecy_text = response['message']['content']
+            print(f"✅ Prophecy generated: {len(prophecy_text)} chars")
 
             # Determine confidence based on RAG context availability
             confidence = "HIGH" if rag_context else "MEDIUM"
@@ -341,9 +350,11 @@ Prophecy:"""
             }
 
         except Exception as e:
-            print(f"⚠️  Failed to generate prophecy: {e}")
+            print(f"❌  Prophecy generation FAILED: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
             return {
-                "prophecy": "The veins are clouded... prophecy unavailable.",
+                "prophecy": f"The veins are clouded... prophecy unavailable. (Error: {type(e).__name__})",
                 "confidence": "LOW",
                 "error": str(e)
             }

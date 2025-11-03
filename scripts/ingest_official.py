@@ -158,19 +158,13 @@ def main():
     print("🚀 Starting official sources ingestion...")
     ensure_data_dir()
 
-    # PRIMARY: Try Ollama web_search first
-    web_search_entries = asyncio.run(fetch_via_web_search())
-
-    # FALLBACK: Use direct RSS/scraping if web_search failed or returned few results
-    if len(web_search_entries) < 5:
-        print("📡 FALLBACK: Using direct RSS/scraping...")
-        blog_entries = fetch_blog_rss()
-        cloud_entries = fetch_cloud_page()
-        fallback_entries = blog_entries + cloud_entries
-        all_entries = web_search_entries + fallback_entries
-    else:
-        print("✅ Web search provided sufficient results, skipping fallback")
-        all_entries = web_search_entries
+    # PRIMARY: Use REAL APIs/RSS (no LLM hallucinations!)
+    print("📡 PRIMARY: Using direct RSS/scraping for FACTUAL data...")
+    blog_entries = fetch_blog_rss()
+    cloud_entries = fetch_cloud_page()
+    all_entries = blog_entries + cloud_entries
+    
+    print(f"✅ Collected {len(all_entries)} VERIFIED entries from official sources")
 
     # Save
     save_data(all_entries)
