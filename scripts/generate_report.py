@@ -17,6 +17,14 @@ except ImportError:
     REVIEW_DB_AVAILABLE = False
     print('⚠️  Review database not available - running without historical context')
 
+# Import enhanced model-powered report generation
+try:
+    from enhanced_report_generator import enhance_report_with_models
+    ENHANCED_GENERATION_AVAILABLE = True
+except ImportError:
+    ENHANCED_GENERATION_AVAILABLE = False
+    print('⚠️  Enhanced generation not available - using template mode')
+
 
 DOCS_DIR = Path("../docs")
 REPORTS_DIR = DOCS_DIR / "reports"
@@ -53,9 +61,44 @@ def load_data():
     return aggregated, insights
 
 
-def build_breakthrough_section(aggregated):
-    """Build detailed breakthrough discoveries section with depth"""
+def build_breakthrough_section(aggregated, model_enhancements=None):
+    """Build detailed breakthrough discoveries section with LLM analysis"""
     lines = ["\n## ⚡ Breakthrough Discoveries\n"]
+    
+    # Check if we have LLM-analyzed breakthroughs
+    if model_enhancements and model_enhancements.get('breakthrough_analyses'):
+        lines.append("*Deep analysis from DeepSeek-V3.1 (81.0% GPQA) - structured intelligence at work!*\n\n")
+        
+        for i, item in enumerate(model_enhancements['breakthrough_analyses'], 1):
+            title = item.get('title', 'Unknown')[:80]
+            source = item.get('source', 'unknown')
+            score = item.get('turbo_score', 0)
+            url = item.get('url', '#')
+            
+            lines.append(f"### {i}. {title}\n\n")
+            lines.append(f"**Source**: {source} | **Relevance Score**: {score:.2f} | **Analyzed by**: {item.get('analyzed_by', 'AI')}\n\n")
+            
+            # Use LLM analysis if available
+            if 'llm_analysis' in item:
+                analysis = item['llm_analysis']
+                lines.append(f"**Category**: {analysis.get('category', 'Unknown')}\n\n")
+                lines.append(f"**Use Case**: {analysis.get('use_case', 'N/A')}\n\n")
+                lines.append(f"**Maturity**: {analysis.get('maturity', 'Unknown').title()}\n\n")
+                
+                if analysis.get('features'):
+                    lines.append("**Key Features**:\n")
+                    for feature in analysis.get('features', [])[:3]:
+                        lines.append(f"- {feature}\n")
+                    lines.append("\n")
+                
+                if analysis.get('audience'):
+                    lines.append(f"**Target Audience**: {', '.join(analysis.get('audience', []))}\n\n")
+            
+            lines.append(f"[Explore Further →]({url})\n\n")
+        
+        return ''.join(lines)
+    
+    # Fallback to template mode
     lines.append("*The most significant ecosystem signals detected today*\n\n")
 
     # Get high-impact items
@@ -83,7 +126,7 @@ def build_breakthrough_section(aggregated):
         if highlights:
             lines.append(f"**Core Contribution**: {highlights[0]}\n\n")
 
-        # Why this matters
+        # Why this matters (template)
         lines.append(f"**Why This Matters**: This discovery advances the Ollama ecosystem by ")
         lines.append(f"providing new capabilities and patterns that developers can build upon.\n\n")
 
@@ -98,8 +141,18 @@ def build_breakthrough_section(aggregated):
     return ''.join(lines)
 
 
-def build_dev_section(aggregated, insights):
-    """Build the 'What This Means for Developers' section with concrete examples"""
+def build_dev_section(aggregated, insights, model_enhancements=None):
+    """Build the 'What This Means for Developers' section with LLM-generated insights or templates"""
+    
+    # If we have LLM-generated insights, use them!
+    if model_enhancements and model_enhancements.get('developer_insights'):
+        lines = ["\n## 🚀 What This Means for Developers\n"]
+        lines.append("*Fresh analysis from GPT-OSS 120B - every report is unique!*\n\n")
+        lines.append(model_enhancements['developer_insights'])
+        lines.append("\n")
+        return ''.join(lines)
+    
+    # Fallback to template mode
     lines = ["\n## 🚀 What This Means for Developers\n"]
     lines.append("*Let's talk about what you can actually DO with all this...*\n")
 
@@ -267,32 +320,9 @@ The ecosystem shows {"strong convergence around key areas" if len(high_turbo) >=
 
 """
 
-    # Add breakthrough section
-    high_turbo_items = sorted(
-        [e for e in aggregated if e.get('turbo_score', 0) >= 0.7],
-        key=lambda x: x.get('turbo_score', 0),
-        reverse=True
-    )[:5]
-
-    if high_turbo_items:
-        for i, item in enumerate(high_turbo_items, 1):
-            title = item.get('title', 'Unknown')[:80]
-            source = item.get('source', 'unknown')
-            score = item.get('turbo_score', 0)
-            url = item.get('url', '#')
-            highlights = item.get('highlights', [])
-
-            report += f"### {i}. {title}\n\n"
-            report += f"**Source**: {source} | **Relevance Score**: {score:.2f}\n\n"
-
-            if highlights:
-                report += f"**Core Contribution**: {highlights[0]}\n\n"
-
-            report += f"**Why This Matters**: This discovery advances the Ollama ecosystem by providing new capabilities and patterns that developers can build upon.\n\n"
-            report += f"**Ecosystem Context**: Builds on recent developments in the community and represents convergence around important use cases.\n\n"
-            report += f"**For Builders**: You can leverage this to build more sophisticated applications. [Explore Further →]({url})\n\n"
-    else:
-        report += "No breakthrough discoveries today - check back tomorrow!\n\n"
+    # Add breakthrough section with LLM analysis
+    model_enhancements = historical_context.get('model_enhancements', {})
+    report += build_breakthrough_section(aggregated, model_enhancements)
 
     report += """---
 
@@ -389,14 +419,19 @@ The ecosystem shows {"strong convergence around key areas" if len(high_turbo) >=
 
     report += "\n---\n\n## 🔔 Prophetic Veins: What This Means\n\n"
 
-    inferences = insights.get('inferences', [])
-    if inferences:
-        report += "EchoVein's wry prophecies — *calibrated speculation with vein-backed data*:\n\n"
-        for inf in inferences:
+    # Use LLM-generated prophecies if available (RAG-powered by Kimi-K2!)
+    llm_prophecies = model_enhancements.get('prophecies', []) if model_enhancements else []
+    
+    if llm_prophecies:
+        report += "EchoVein's RAG-powered prophecies — *historical patterns + fresh intelligence*:\n\n"
+        report += "*Powered by Kimi-K2:1T (66.1% Tau-Bench) + ChromaDB vector memory*\n\n"
+        
+        for inf in llm_prophecies:
             pattern = inf.get('pattern', 'N/A')
             observation = inf.get('observation', 'N/A')
             inference = inf.get('inference', 'N/A')
             confidence = inf.get('confidence', 'medium')
+            rag_enabled = inf.get('rag_enabled', False)
             
             # Vein-style emoji
             emoji = "🩸" if confidence == "high" else "⚡" if confidence == "medium" else "💡"
@@ -406,6 +441,8 @@ The ecosystem shows {"strong convergence around key areas" if len(high_turbo) >=
             report += f"- **Surface Reading**: {observation}\n"
             report += f"- **Vein Prophecy**: {inference}\n"
             report += f"- **Confidence Vein**: {confidence.upper()} ({emoji})\n"
+            if rag_enabled:
+                report += f"- **RAG Context**: ✅ Historical patterns analyzed\n"
             
             # Add sly commentary based on confidence
             if confidence == "high":
@@ -415,10 +452,35 @@ The ecosystem shows {"strong convergence around key areas" if len(high_turbo) >=
             else:
                 report += f"- **EchoVein's Take**: Phantom vein? Could be fool's gold.\n\n"
     else:
-        report += "*No major prophecies today — but silence speaks in veins.*\n"
+        # Fallback to template-based inferences
+        inferences = insights.get('inferences', [])
+        if inferences:
+            report += "EchoVein's prophecies — *calibrated speculation with vein-backed data*:\n\n"
+            for inf in inferences:
+                pattern = inf.get('pattern', 'N/A')
+                observation = inf.get('observation', 'N/A')
+                inference = inf.get('inference', 'N/A')
+                confidence = inf.get('confidence', 'medium')
+                
+                emoji = "🩸" if confidence == "high" else "⚡" if confidence == "medium" else "💡"
+                clean_pattern = pattern.replace('_', ' ').title()
+                
+                report += f"{emoji} **Vein Oracle: {clean_pattern}**\n\n"
+                report += f"- **Surface Reading**: {observation}\n"
+                report += f"- **Vein Prophecy**: {inference}\n"
+                report += f"- **Confidence Vein**: {confidence.upper()} ({emoji})\n"
+                
+                if confidence == "high":
+                    report += f"- **EchoVein's Take**: This vein's *throbbing* — trust the flow.\n\n"
+                elif confidence == "medium":
+                    report += f"- **EchoVein's Take**: Promising artery, but watch for clots.\n\n"
+                else:
+                    report += f"- **EchoVein's Take**: Phantom vein? Could be fool's gold.\n\n"
+        else:
+            report += "*No major prophecies today — but silence speaks in veins.*\n"
 
-    # Add the developer-focused section
-    report += build_dev_section(aggregated, insights)
+    # Add the developer-focused section with LLM-generated insights
+    report += build_dev_section(aggregated, insights, model_enhancements)
 
     # Add bounty section if available
     try:
@@ -844,7 +906,8 @@ title: Ollama Pulse - Daily Ecosystem Intelligence
 
 
 def main():
-    print("🚀 Starting conversational report generation...")
+    print("🚀 Starting ENHANCED conversational report generation...")
+    print("🤖 Multi-model pipeline: DeepSeek → GPT-OSS → Kimi-K2 → GLM-4.6")
 
     # Initialize review integration if available
     integration = None
@@ -855,13 +918,13 @@ def main():
         except Exception as e:
             print(f"⚠️  Review database error: {e}")
 
-    # Initialize RAG engine if available
+    # Initialize RAG engine if available (NOW CLOUD-COMPATIBLE!)
     rag_engine = None
     try:
         from langchain_adaptive import AdaptiveProphecyEngine
-        rag_engine = AdaptiveProphecyEngine()
+        rag_engine = AdaptiveProphecyEngine()  # Uses cloud by default now
         if rag_engine.initialize():
-            print("✅ RAG engine initialized with vector embeddings")
+            print("✅ RAG engine initialized with Ollama Cloud + ChromaDB vectors")
         else:
             rag_engine = None
     except Exception as e:
@@ -894,6 +957,21 @@ def main():
                 print(f"🔄 Found {len(returning_projects)} returning projects")
         except Exception as e:
             print(f"⚠️  Error finding returning projects: {e}")
+
+    # NEW: Run multi-model enhancement pipeline
+    model_enhancements = {}
+    if ENHANCED_GENERATION_AVAILABLE and os.getenv("OLLAMA_API_KEY"):
+        try:
+            import asyncio
+            print("\n🤖 Activating multi-model intelligence pipeline...")
+            model_enhancements = asyncio.run(
+                enhance_report_with_models(aggregated, insights, rag_engine)
+            )
+            print("✅ Model enhancements complete!")
+            historical_context['model_enhancements'] = model_enhancements
+        except Exception as e:
+            print(f"⚠️  Model enhancement error: {e}")
+            print("   Falling back to template mode...")
 
     # Cleanup RAG engine before writing to database
     if rag_engine:
