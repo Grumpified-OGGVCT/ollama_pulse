@@ -30,70 +30,92 @@ def get_today_filename():
 
 def fetch_ollama_tags(filter_type="turbo", depth="full"):
     """
-    Fetch Ollama API tags for cloud models
+    Fetch Ollama Cloud models - use OFFICIAL list from docs.ollama.com/cloud
     Args:
-        filter_type: Filter for 'turbo' or 'all' models
-        depth: 'full' includes detailed model cards, 'basic' is quick
+        filter_type: 'turbo' returns cloud models, 'all' returns cloud models (same thing)
+        depth: 'full' includes detailed info, 'basic' is minimal
     """
-    print(f"📡 Fetching Ollama tags (filter={filter_type}, depth={depth})...")
+    print(f"📡 Fetching Ollama Cloud models (filter={filter_type}, depth={depth})...")
+    
+    # OFFICIAL cloud models per https://docs.ollama.com/cloud
+    official_cloud_models = [
+        {
+            "name": "deepseek-v3.1:671b-cloud",
+            "params": "671B",
+            "context": "131K",
+            "capability": "reasoning with hybrid thinking",
+            "url": "https://ollama.com/library/deepseek-v3.1"
+        },
+        {
+            "name": "gpt-oss:120b-cloud", 
+            "params": "120B",
+            "context": "131K",
+            "capability": "powerful reasoning and agentic tasks",
+            "url": "https://ollama.com/library/gpt-oss"
+        },
+        {
+            "name": "gpt-oss:20b-cloud",
+            "params": "20B", 
+            "context": "131K",
+            "capability": "versatile developer use cases",
+            "url": "https://ollama.com/library/gpt-oss"
+        },
+        {
+            "name": "kimi-k2:1t-cloud",
+            "params": "1T",
+            "context": "256K",
+            "capability": "agentic and coding tasks",
+            "url": "https://ollama.com/library/kimi-k2"
+        },
+        {
+            "name": "qwen3-coder:480b-cloud",
+            "params": "480B",
+            "context": "262K", 
+            "capability": "polyglot coding specialist",
+            "url": "https://ollama.com/library/qwen3-coder"
+        },
+        {
+            "name": "glm-4.6:cloud",
+            "params": "14.2B",
+            "context": "200K",
+            "capability": "advanced agentic and reasoning",
+            "url": "https://ollama.com/library/glm-4.6"
+        },
+        {
+            "name": "minimax-m2:cloud",
+            "params": "Unknown",
+            "context": "Unknown",
+            "capability": "high-efficiency coding and agentic workflows",
+            "url": "https://ollama.com/library/minimax-m2"
+        },
+        {
+            "name": "qwen3-vl:235b-cloud",
+            "params": "235B",
+            "context": "131K",
+            "capability": "vision-language multimodal",
+            "url": "https://ollama.com/library/qwen3-vl"
+        }
+    ]
+    
     entries = []
+    for model_info in official_cloud_models:
+        entry = {
+            "title": f"Model: {model_info['name']} - {model_info['capability']}",
+            "date": datetime.now().isoformat(),
+            "summary": f"{model_info['params']} parameters, {model_info['context']} context - {model_info['capability']}",
+            "url": model_info['url'],
+            "source": "cloud_api",
+            "highlights": [
+                f"model: {model_info['name']}", 
+                f"params: {model_info['params']}",
+                f"context: {model_info['context']}",
+                "cloud",
+                "-cloud suffix"
+            ]
+        }
+        entries.append(entry)
     
-    try:
-        # Try to fetch from ollama.com/api/tags (if publicly available)
-        # This is a placeholder - adjust URL based on actual API
-        response = requests.get(
-            "https://ollama.com/library",
-            timeout=10
-        )
-        response.raise_for_status()
-        
-        # Extract cloud models from the library page
-        from bs4 import BeautifulSoup
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Look for model links or cards
-        models = []
-        for link in soup.find_all('a', href=True):
-            href = link.get('href', '')
-            if '/library/' in href:
-                model_name = href.split('/library/')[-1]
-                if filter_type == "turbo" and "turbo" not in model_name.lower():
-                    continue
-                models.append(model_name)
-        
-        # Create entries for found models
-        for model in models[:20]:  # Limit to 20 models
-            entry = {
-                "title": f"Cloud Model: {model}",
-                "date": datetime.now().isoformat(),
-                "summary": f"Available cloud model variant: {model}",
-                "url": f"https://ollama.com/library/{model}",
-                "source": "cloud_api",
-                "highlights": [f"model: {model}", "cloud variant"]
-            }
-            entries.append(entry)
-        
-        print(f"✅ Found {len(entries)} cloud models")
-        
-    except Exception as e:
-        print(f"⚠️  Could not fetch cloud tags: {e}")
-        # Fallback: return known cloud models
-        fallback_models = [
-            "qwen3-coder-480b-cloud", "glm-4.6-cloud", "gpt-oss-120b-cloud",
-            "llama-3.2-turbo", "mixtral-turbo"
-        ]
-        for model in fallback_models:
-            entry = {
-                "title": f"Cloud Model: {model}",
-                "date": datetime.now().isoformat(),
-                "summary": f"Known cloud model variant: {model}",
-                "url": f"https://ollama.com/library/{model}",
-                "source": "cloud_api",
-                "highlights": [f"model: {model}", "cloud variant", "turbo"]
-            }
-            entries.append(entry)
-        print(f"✅ Using fallback: {len(entries)} known cloud models")
-    
+    print(f"✅ Loaded {len(entries)} OFFICIAL cloud models from docs.ollama.com/cloud")
     return entries
 
 
