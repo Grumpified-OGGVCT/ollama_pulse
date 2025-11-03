@@ -18,14 +18,14 @@ from ollama_turbo_client import OllamaTurboClient
 
 
 def ensure_data_dir():
-    """Create data/official directory if it doesn't exist"""
-    Path("data/official").mkdir(parents=True, exist_ok=True)
+    """Create data/cloud directory if it doesn't exist"""
+    Path("data/cloud").mkdir(parents=True, exist_ok=True)
 
 
 def get_today_filename():
     """Get filename for today's data"""
     today = datetime.now().strftime("%Y-%m-%d")
-    return f"data/official/{today}.json"
+    return f"data/cloud/{today}.json"
 
 
 def fetch_ollama_tags(filter_type="turbo", depth="full"):

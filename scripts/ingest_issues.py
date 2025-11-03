@@ -26,7 +26,7 @@ def ensure_data_dir():
 def get_today_filename():
     """Get filename for today's data"""
     today = datetime.now().strftime("%Y-%m-%d")
-    return f"data/community/{today}.json"
+    return f"data/issues/{today}.json"
 
 
 def search_github_issues(query="ollama turbo cloud", max_results=50):

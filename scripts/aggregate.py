@@ -97,34 +97,38 @@ def aggregate_data():
 
     # Load from all sources (original 10)
     official = load_source_data("official")
+    cloud = load_source_data("cloud")  # Changed from models - cloud models data
     community = load_source_data("community")
     tools = load_source_data("tools")
     bounties = load_source_data("bounties")
     nostr = load_source_data("nostr")
 
-    # Load from new sources (5 new)
+    # Load from new sources (6 new)
+    issues = load_source_data("issues")  # Fixed - was saving to community/
     stackoverflow = load_source_data("stackoverflow")
-    models = load_source_data("models")
+    model_registry = load_source_data("model_registry")  # Fixed - was models/
     releases = load_source_data("releases")
     devblogs = load_source_data("devblogs")
     discord = load_source_data("discord")
     manual = load_source_data("manual")
 
     print(f"  📊 Official: {len(official)} entries")
+    print(f"  ☁️  Cloud Models: {len(cloud)} entries")
     print(f"  📊 Community: {len(community)} entries")
-    print(f"  📊 Tools: {len(tools)} entries")
+    print(f"  🔧 Tools: {len(tools)} entries")
     print(f"  💰 Bounties: {len(bounties)} entries")
     print(f"  🌐 Nostr: {len(nostr)} entries")
+    print(f"  ❓ Issues/PRs: {len(issues)} entries")
     print(f"  💬 Stack Overflow: {len(stackoverflow)} entries")
-    print(f"  🤖 Model Registry: {len(models)} entries")
+    print(f"  🤖 Model Registry: {len(model_registry)} entries")
     print(f"  📦 Releases: {len(releases)} entries")
     print(f"  📝 Dev Blogs: {len(devblogs)} entries")
     print(f"  🎮 Discord: {len(discord)} entries")
     print(f"  ⭐ Manual Tracking: {len(manual)} entries")
 
     # Combine all
-    all_entries = (official + community + tools + bounties + nostr +
-                   stackoverflow + models + releases + devblogs + discord + manual)
+    all_entries = (official + cloud + community + tools + bounties + nostr +
+                   issues + stackoverflow + model_registry + releases + devblogs + discord + manual)
     
     # Deduplicate by URL (handle entries without URL gracefully)
     unique_dict = {}

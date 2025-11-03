@@ -13,10 +13,10 @@ import time
 OLLAMA_LIBRARY_URL = "https://ollama.com/library"
 
 def ensure_data_dir():
-    Path("data/models").mkdir(parents=True, exist_ok=True)
+    Path("data/model_registry").mkdir(parents=True, exist_ok=True)
 
 def get_today_filename():
-    return f"data/models/{datetime.now().strftime('%Y-%m-%d')}.json"
+    return f"data/model_registry/{datetime.now().strftime('%Y-%m-%d')}.json"
 
 def fetch_model_library():
     """Scrape Ollama model library for new/updated models"""
