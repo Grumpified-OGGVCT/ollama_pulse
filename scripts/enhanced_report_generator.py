@@ -6,6 +6,8 @@ Uses multi-model pipeline with proper role assignments per benchmarks
 import asyncio
 import json
 import os
+import random
+from datetime import datetime
 from typing import List, Dict
 from ollama_turbo_client import OllamaTurboClient
 from model_registry import select_model_for_task
@@ -109,12 +111,15 @@ Target: 800-1200 words of genuinely useful content.
 Developer Insights:"""
 
             model_id = select_model_for_task("synthesis", requires_reasoning=True)
+            # Vary temperature for uniqueness (different each day)
+            daily_temp = random.uniform(0.75, 0.92)
             response = await client.generate(
                 model=model_id,
                 prompt=prompt,
                 max_tokens=3000,
-                temperature=0.7
+                temperature=daily_temp
             )
+            print(f"  ✓ Using temperature: {daily_temp:.2f} for creative variation")
             
             print(f"  ✓ Generated {len(response)} chars of developer insights")
             return response

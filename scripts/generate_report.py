@@ -279,13 +279,15 @@ def generate_vein_headline(mode, pattern_name, items_count):
 
 
 def generate_report_md(aggregated, insights, historical_context=None):
-    """Generate EchoVein-style conversational Markdown report"""
+    """Generate EchoVein-style conversational Markdown report with navigation"""
     today = get_today_date_str()
 
-    # Get current time in CST
+    # Get current time in both UTC and CST
     from datetime import datetime
     import pytz
+    utc = pytz.UTC
     cst = pytz.timezone('America/Chicago')
+    current_time_utc = datetime.now(utc).strftime('%I:%M %p UTC')
     current_time_cst = datetime.now(cst).strftime('%I:%M %p CST')
 
     # Determine vein mode and tone
@@ -295,16 +297,50 @@ def generate_report_md(aggregated, insights, historical_context=None):
     # Turbo score stats
     high_turbo = [e for e in aggregated if e.get('turbo_score', 0) >= 0.7]
 
-    report = f"""# {mode_emoji} Ollama Pulse – {today}
+    # Navigation menu
+    nav_menu = """
+<nav id="report-navigation" style="position: sticky; top: 0; z-index: 1000; background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%); padding: 1rem; margin-bottom: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+  <div style="font-size: 1.2rem; font-weight: bold; color: #fff; margin-bottom: 1rem;">📋 Report Navigation</div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;">
+    <a href="#summary" style="display: block; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.1); color: #fff; text-decoration: none; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s;">📊 Summary</a>
+    <a href="#breakthroughs" style="display: block; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.1); color: #fff; text-decoration: none; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s;">⚡ Breakthroughs</a>
+    <a href="#official" style="display: block; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.1); color: #fff; text-decoration: none; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s;">🎯 Official</a>
+    <a href="#community" style="display: block; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.1); color: #fff; text-decoration: none; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s;">🛠️ Community</a>
+    <a href="#patterns" style="display: block; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.1); color: #fff; text-decoration: none; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s;">📈 Patterns</a>
+    <a href="#prophecies" style="display: block; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.1); color: #fff; text-decoration: none; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s;">🔔 Prophecies</a>
+    <a href="#developers" style="display: block; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.1); color: #fff; text-decoration: none; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s;">🚀 Developers</a>
+    <a href="#bounties" style="display: block; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.1); color: #fff; text-decoration: none; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s;">💰 Bounties</a>
+  </div>
+</nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const links = document.querySelectorAll('a[href^="#"]');
+  links.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+});
+</script>
+"""
+
+    report = f"""{nav_menu}
+
+# {mode_emoji} Ollama Pulse – {today}
 ## {mode_description}
 
-**Generated**: {current_time_cst} on {today}
+**Generated**: {current_time_utc} ({current_time_cst}) on {today}
 
 *EchoVein here, your vein-tapping oracle excavating Ollama's hidden arteries...*
 
 **Today's Vibe**: {mode_name.replace('_', ' ').title()} — The ecosystem is {"pulsing with fresh blood" if len(aggregated) > 20 else "in steady throb mode"}.
 
 ---
+
+<div id="summary"></div>
 
 ## 🔬 Ecosystem Intelligence Summary
 
@@ -334,9 +370,21 @@ The ecosystem shows {"strong convergence around key areas" if len(high_turbo) >=
 
     # Add breakthrough section with LLM analysis
     model_enhancements = historical_context.get('model_enhancements', {})
+    
+    report += """
+<div id="breakthroughs"></div>
+
+"""
     report += build_breakthrough_section(aggregated, model_enhancements)
 
-    report += """---
+    report += """
+<div style="text-align: right; margin: 2rem 0;">
+  <a href="#report-navigation" style="padding: 0.5rem 1.5rem; background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%); color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">⬆️ Back to Top</a>
+</div>
+
+---
+
+<div id="official"></div>
 
 ## 🎯 Official Veins: What Ollama Team Pumped Out
 
@@ -358,7 +406,18 @@ The ecosystem shows {"strong convergence around key areas" if len(high_turbo) >=
     else:
         report += "*No royal flush today — but the underground never stops mining.*\n"
 
-    report += "\n---\n\n## 🛠️ Community Veins: What Developers Are Excavating\n\n"
+    report += """
+<div style="text-align: right; margin: 2rem 0;">
+  <a href="#report-navigation" style="padding: 0.5rem 1.5rem; background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%); color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">⬆️ Back to Top</a>
+</div>
+
+---
+
+<div id="community"></div>
+
+## 🛠️ Community Veins: What Developers Are Excavating
+
+"""
 
     tools = [e for e in aggregated if e.get('source') in ['github', 'reddit', 'github_issues', 'hackernews', 'youtube', 'huggingface']]
     if tools:
@@ -376,7 +435,18 @@ The ecosystem shows {"strong convergence around key areas" if len(high_turbo) >=
     else:
         report += "*Quiet vein day — even the best miners rest.*\n"
 
-    report += "\n---\n\n## 📈 Vein Pattern Mapping: Arteries & Clusters\n\n"
+    report += """
+<div style="text-align: right; margin: 2rem 0;">
+  <a href="#report-navigation" style="padding: 0.5rem 1.5rem; background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%); color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">⬆️ Back to Top</a>
+</div>
+
+---
+
+<div id="patterns"></div>
+
+## 📈 Vein Pattern Mapping: Arteries & Clusters
+
+"""
 
     patterns = insights.get('patterns', {})
     if patterns:
@@ -429,7 +499,18 @@ The ecosystem shows {"strong convergence around key areas" if len(high_turbo) >=
     else:
         report += "*No major vein clusters today — but the deep throb continues.*\n"
 
-    report += "\n---\n\n## 🔔 Prophetic Veins: What This Means\n\n"
+    report += """
+<div style="text-align: right; margin: 2rem 0;">
+  <a href="#report-navigation" style="padding: 0.5rem 1.5rem; background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%); color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">⬆️ Back to Top</a>
+</div>
+
+---
+
+<div id="prophecies"></div>
+
+## 🔔 Prophetic Veins: What This Means
+
+"""
 
     # Use LLM-generated prophecies if available (RAG-powered by Kimi-K2!)
     llm_prophecies = model_enhancements.get('prophecies', []) if model_enhancements else []
@@ -492,13 +573,32 @@ The ecosystem shows {"strong convergence around key areas" if len(high_turbo) >=
             report += "*No major prophecies today — but silence speaks in veins.*\n"
 
     # Add the developer-focused section with LLM-generated insights
+    report += """
+<div style="text-align: right; margin: 2rem 0;">
+  <a href="#report-navigation" style="padding: 0.5rem 1.5rem; background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%); color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">⬆️ Back to Top</a>
+</div>
+
+---
+
+<div id="developers"></div>
+
+"""
     report += build_dev_section(aggregated, insights, model_enhancements)
 
     # Add bounty section if available
+    report += """
+<div style="text-align: right; margin: 2rem 0;">
+  <a href="#report-navigation" style="padding: 0.5rem 1.5rem; background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%); color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">⬆️ Back to Top</a>
+</div>
+
+---
+
+<div id="bounties"></div>
+
+"""
     try:
         bounty_content = render_bounty_section()
         if bounty_content and "No bounty pulses" not in bounty_content:
-            report += "\n---\n\n"
             report += bounty_content
     except Exception as e:
         print(f"⚠️  Bounty section error: {e}")
