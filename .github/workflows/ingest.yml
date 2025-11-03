@@ -3,14 +3,114 @@ name: Ollama Pulse Ingestion
 on:
   schedule:
     - cron: '0 * * * *'  # Every hour at :00
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      run_parallel:
+        description: 'Run ingestion scripts in parallel'
+        required: false
+        default: 'true'
+        type: boolean
 
 permissions:
   contents: write
 
+concurrency:
+  group: ollama-pulse-ingestion
+  cancel-in-progress: true
+
 jobs:
   ingest:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        script:
+          - { name: 'official', file: 'ingest_official.py', critical: true }
+          - { name: 'cloud', file: 'ingest_cloud.py', critical: true }
+          - { name: 'community', file: 'ingest_community.py', critical: false }
+          - { name: 'issues', file: 'ingest_issues.py', critical: false }
+          - { name: 'tools', file: 'ingest_tools.py', critical: false }
+          - { name: 'bounties', file: 'ingest_bounties.py', critical: false }
+          - { name: 'nostr', file: 'ingest_nostr.py', critical: false }
+          - { name: 'stackoverflow', file: 'ingest_stackoverflow.py', critical: false }
+          - { name: 'model_registry', file: 'ingest_model_registry.py', critical: false }
+          - { name: 'releases', file: 'ingest_releases.py', critical: false }
+          - { name: 'devblogs', file: 'ingest_devblogs.py', critical: false }
+          - { name: 'discord', file: 'ingest_discord.py', critical: false }
+          - { name: 'manual', file: 'ingest_manual.py', critical: false }
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      - name: Cache ML models
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/huggingface
+          key: ${{ runner.os }}-huggingface-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-huggingface-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: CI Smoke Check
+        if: matrix.script.critical == true
+        env:
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+        run: python scripts/ci_smoke_check.py
+
+      - name: Run ingestion - ${{ matrix.script.name }}
+        env:
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+        run: |
+          echo "::group::Running ${{ matrix.script.file }}"
+          START=$(date +%s)
+          
+          python scripts/${{ matrix.script.file }} || {
+            if [ "${{ matrix.script.critical }}" == "true" ]; then
+              echo "::error::Critical ingestion script failed: ${{ matrix.script.name }}"
+              exit 1
+            else
+              echo "::warning::Non-critical ingestion script failed: ${{ matrix.script.name }}"
+              exit 0
+            fi
+          }
+          
+          END=$(date +%s)
+          DURATION=$((END - START))
+          echo "::notice::${{ matrix.script.name }} completed in ${DURATION}s"
+          echo "::endgroup::"
+        continue-on-error: ${{ !matrix.script.critical }}
+
+      - name: Upload ingestion artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingestion-${{ matrix.script.name }}-${{ github.run_number }}
+          path: data/
+          retention-days: 1
+          if-no-files-found: warn
+
+  aggregate:
+    runs-on: ubuntu-latest
+    needs: ingest
+    if: always()
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -24,63 +124,74 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
+      - name: Cache ML models
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/huggingface
+          key: ${{ runner.os }}-huggingface-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-huggingface-
+
       - name: Install dependencies
         run: |
+          pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: CI Smoke Check - Validate Ollama API
-        env:
-          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
-        run: |
-          python scripts/ci_smoke_check.py
-
-      - name: Run ingestion (all 16 sources)
-        env:
-          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
-        run: |
-          python scripts/ingest_official.py
-          python scripts/ingest_cloud.py
-          python scripts/ingest_community.py
-          python scripts/ingest_issues.py
-          python scripts/ingest_tools.py
-          python scripts/ingest_bounties.py
-          python scripts/ingest_nostr.py
-          python scripts/ingest_stackoverflow.py
-          python scripts/ingest_model_registry.py
-          python scripts/ingest_releases.py
-          python scripts/ingest_devblogs.py
-          python scripts/ingest_discord.py
-          python scripts/ingest_manual.py
+      - name: Download all ingestion artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ingestion-*
+          path: data/
+          merge-multiple: true
 
       - name: Aggregate data
         env:
           OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
-        run: python scripts/aggregate.py
+        run: |
+          python scripts/aggregate.py || {
+            echo "::error::Aggregation failed"
+            exit 1
+          }
 
       - name: Mine insights
         env:
           OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
-        run: python scripts/mine_insights.py
+        run: |
+          python scripts/mine_insights.py || {
+            echo "::warning::Insight mining failed - continuing anyway"
+            exit 0
+          }
+        continue-on-error: true
 
       - name: Commit and push data changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data/
+          
           if ! git diff --quiet || ! git diff --staged --quiet; then
             git commit -m "chore(data): hourly ingestion $(date -u '+%Y-%m-%d %H:%M UTC')"
-            # Pull latest changes before pushing
-            git pull --rebase origin main || {
-              # If rebase fails, abort and try merge
-              git rebase --abort
-              git pull origin main --no-rebase
-            }
-            git push origin main
+            
+            # Enhanced push with retry logic
+            for i in {1..3}; do
+              git pull --rebase origin main && git push origin main && break || {
+                if [ $i -eq 3 ]; then
+                  echo "::error::Failed to push after 3 attempts"
+                  exit 1
+                fi
+                echo "::warning::Push failed, retry $i/3..."
+                sleep 5
+              }
+            done
+          else
+            echo "::notice::No data changes to commit"
           fi
 
   turbo-cloud-deep:
     runs-on: ubuntu-latest
-    needs: ingest  # Wait for ingest job to complete first
+    needs: aggregate
+    if: success()
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -96,12 +207,17 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Fetch Ollama Cloud Details
         env:
           OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
-        run: python scripts/ingest_cloud.py --filter=turbo --depth=full
+        run: |
+          python scripts/ingest_cloud.py --filter=turbo --depth=full || {
+            echo "::warning::Cloud deep scan failed"
+            exit 0
+          }
         continue-on-error: true
 
       - name: GitHub Repo Scan
@@ -110,36 +226,37 @@ jobs:
           script: |
             const fs = require('fs');
 
-            // Search for Ollama Turbo Cloud repos
-            const { data } = await github.rest.search.code({
-              q: 'ollama turbo cloud lang:python',
-              per_page: 50
-            });
+            try {
+              const { data } = await github.rest.search.code({
+                q: 'ollama turbo cloud lang:python',
+                per_page: 50
+              });
 
-            // Save results for aggregation
-            const results = data.items.map(item => ({
-              title: `: ``,
-              date: new Date().toISOString(),
-              summary: `Code mention in ``,
-              url: item.html_url,
-              source: 'github_code_search',
-              highlights: ['code', 'turbo', 'cloud']
-            }));
+              const results = data.items.map(item => ({
+                title: `${item.repository.full_name}: ${item.name}`,
+                date: new Date().toISOString(),
+                summary: `Code mention in ${item.repository.full_name}`,
+                url: item.html_url,
+                source: 'github_code_search',
+                highlights: ['code', 'turbo', 'cloud']
+              }));
 
-            // Append to community data
-            const today = new Date().toISOString().split('T')[0];
-            const filename = `data/community/``.json`;
+              const today = new Date().toISOString().split('T')[0];
+              const filename = `data/community/${today}.json`;
 
-            let existing = [];
-            if (fs.existsSync(filename)) {
-              existing = JSON.parse(fs.readFileSync(filename, 'utf8'));
+              let existing = [];
+              if (fs.existsSync(filename)) {
+                existing = JSON.parse(fs.readFileSync(filename, 'utf8'));
+              }
+
+              const combined = [...existing, ...results];
+              const unique = Array.from(new Map(combined.map(e => [e.url, e])).values());
+
+              fs.writeFileSync(filename, JSON.stringify(unique, null, 2));
+              console.log(`Saved ${results.length} GitHub code search results`);
+            } catch (error) {
+              core.warning(`GitHub code search failed: ${error.message}`);
             }
-
-            const combined = [...existing, ...results];
-            const unique = Array.from(new Map(combined.map(e => [e.url, e])).values());
-
-            fs.writeFileSync(filename, JSON.stringify(unique, null, 2));
-            console.log(`Saved `` GitHub code search results`);
         continue-on-error: true
 
       - name: Commit cloud search data
@@ -147,15 +264,20 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data/
+          
           if ! git diff --quiet || ! git diff --staged --quiet; then
             git commit -m "chore(data): turbo cloud deep scan $(date -u '+%Y-%m-%d %H:%M UTC')"
-            # Pull latest changes before pushing
-            git pull --rebase origin main || {
-              # If rebase fails, abort and try merge
-              git rebase --abort
-              git pull origin main --no-rebase
-            }
-            git push origin main
+            
+            # Enhanced push with retry logic
+            for i in {1..3}; do
+              git pull --rebase origin main && git push origin main && break || {
+                if [ $i -eq 3 ]; then
+                  echo "::warning::Cloud scan push failed after 3 attempts - data will be retried next hour"
+                  exit 0
+                fi
+                echo "::warning::Push failed, retry $i/3..."
+                sleep 5
+              }
+            done
           fi
         continue-on-error: true
-

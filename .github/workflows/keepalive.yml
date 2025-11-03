@@ -1,0 +1,76 @@
+name: Keepalive - Prevent Workflow Disable
+
+on:
+  schedule:
+    # Run every 50 days to prevent GitHub from disabling workflows
+    # GitHub disables scheduled workflows after 60 days of inactivity
+    - cron: '0 12 */50 * *'  # Every 50 days at noon UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: keepalive
+  cancel-in-progress: true
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Update keepalive timestamp
+        run: |
+          mkdir -p .github
+          echo "Last keepalive: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" > .github/KEEPALIVE
+          echo "Next keepalive: $(date -u -d '+50 days' '+%Y-%m-%d %H:%M:%S UTC')" >> .github/KEEPALIVE
+          echo "Purpose: Prevents GitHub from disabling scheduled workflows after 60 days of inactivity" >> .github/KEEPALIVE
+
+      - name: Commit keepalive timestamp
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: keepalive ping to prevent workflow disable"
+          file_pattern: '.github/KEEPALIVE'
+          commit_user_name: Ollama Pulse Bot
+          commit_user_email: pulse@ollama-pulse.github.io
+
+      - name: Trigger all workflows
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_PAT }}
+          script: |
+            const workflows = [
+              'morning_report.yml',
+              'afternoon_report.yml',
+              'ingest.yml'
+            ];
+            
+            for (const workflow of workflows) {
+              try {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: workflow,
+                  ref: 'main'
+                });
+                console.log(`✅ Triggered ${workflow}`);
+              } catch (error) {
+                console.log(`⚠️  Failed to trigger ${workflow}: ${error.message}`);
+              }
+            }
+
+      - name: Workflow summary
+        run: |
+          echo "### ✅ Keepalive Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Purpose**: Prevent GitHub from disabling scheduled workflows" >> $GITHUB_STEP_SUMMARY
+          echo "- **Next keepalive**: $(date -u -d '+50 days' '+%Y-%m-%d')" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflows triggered**: morning_report, afternoon_report, ingestion" >> $GITHUB_STEP_SUMMARY
+

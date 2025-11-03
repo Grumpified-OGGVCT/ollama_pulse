@@ -1,0 +1,138 @@
+name: Performance Monitoring
+
+on:
+  schedule:
+    # Run daily at midnight UTC to analyze workflow performance
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: performance-monitoring
+  cancel-in-progress: true
+
+jobs:
+  analyze_performance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Analyze workflow runs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_PAT }}
+          script: |
+            const fs = require('fs');
+            
+            // Get workflow runs from last 24 hours
+            const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            
+            const workflows = [
+              { name: 'ingest.yml', label: 'Ingestion' },
+              { name: 'morning_report.yml', label: 'Morning Report' },
+              { name: 'afternoon_report.yml', label: 'Afternoon Report' }
+            ];
+            
+            const metrics = {
+              timestamp: new Date().toISOString(),
+              workflows: {}
+            };
+            
+            for (const workflow of workflows) {
+              try {
+                const { data } = await github.rest.actions.listWorkflowRuns({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: workflow.name,
+                  created: `>=${oneDayAgo}`,
+                  per_page: 100
+                });
+                
+                const runs = data.workflow_runs;
+                const successful = runs.filter(r => r.conclusion === 'success').length;
+                const failed = runs.filter(r => r.conclusion === 'failure').length;
+                const total = runs.length;
+                
+                // Calculate average duration for successful runs
+                const durations = runs
+                  .filter(r => r.conclusion === 'success')
+                  .map(r => {
+                    const start = new Date(r.created_at);
+                    const end = new Date(r.updated_at);
+                    return (end - start) / 1000; // seconds
+                  });
+                
+                const avgDuration = durations.length > 0
+                  ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
+                  : 0;
+                
+                metrics.workflows[workflow.label] = {
+                  total_runs: total,
+                  successful: successful,
+                  failed: failed,
+                  success_rate: total > 0 ? ((successful / total) * 100).toFixed(1) + '%' : 'N/A',
+                  avg_duration_seconds: avgDuration
+                };
+                
+                console.log(`${workflow.label}: ${successful}/${total} successful, avg ${avgDuration}s`);
+              } catch (error) {
+                console.log(`Error analyzing ${workflow.name}: ${error.message}`);
+              }
+            }
+            
+            // Save metrics
+            fs.writeFileSync('performance_metrics.json', JSON.stringify(metrics, null, 2));
+            
+            // Create summary
+            let summary = `## 📊 Performance Report\n\n`;
+            summary += `**Period**: Last 24 hours\n`;
+            summary += `**Timestamp**: ${metrics.timestamp}\n\n`;
+            summary += `| Workflow | Runs | Success | Failed | Success Rate | Avg Duration |\n`;
+            summary += `|----------|------|---------|--------|--------------|-------------|\n`;
+            
+            for (const [name, data] of Object.entries(metrics.workflows)) {
+              summary += `| ${name} | ${data.total_runs} | ${data.successful} | ${data.failed} | ${data.success_rate} | ${data.avg_duration_seconds}s |\n`;
+            }
+            
+            fs.writeFileSync('PERFORMANCE_REPORT.md', summary);
+
+      - name: Check for slow workflows
+        run: |
+          # Alert if workflows are taking too long
+          if [ -f "performance_metrics.json" ]; then
+            INGEST_DURATION=$(cat performance_metrics.json | grep -A 5 "Ingestion" | grep "avg_duration_seconds" | grep -o '[0-9]*')
+            
+            if [ ! -z "$INGEST_DURATION" ] && [ "$INGEST_DURATION" -gt 300 ]; then
+              echo "::warning::Ingestion taking too long: ${INGEST_DURATION}s (target: <300s)"
+              echo "::notice::Consider optimizing slow ingestion scripts"
+            else
+              echo "::notice::Ingestion performance healthy: ${INGEST_DURATION}s"
+            fi
+          fi
+
+      - name: Commit performance metrics
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(metrics): daily performance analysis"
+          file_pattern: 'performance_metrics.json PERFORMANCE_REPORT.md'
+          commit_user_name: Ollama Pulse Bot
+          commit_user_email: pulse@ollama-pulse.github.io
+        continue-on-error: true
+
+      - name: Workflow summary
+        if: always()
+        run: |
+          if [ -f "PERFORMANCE_REPORT.md" ]; then
+            cat PERFORMANCE_REPORT.md >> $GITHUB_STEP_SUMMARY
+          fi
+

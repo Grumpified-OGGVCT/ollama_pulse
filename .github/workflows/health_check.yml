@@ -1,0 +1,194 @@
+name: System Health Check
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: health-check
+  cancel-in-progress: true
+
+jobs:
+  health_check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 100  # Need recent history
+
+      - name: Check data freshness
+        id: data_check
+        run: |
+          TODAY=$(date -u '+%Y-%m-%d')
+          
+          # Check if today's aggregated data exists
+          if [ -f "data/aggregated/${TODAY}.json" ]; then
+            echo "data_exists=true" >> $GITHUB_OUTPUT
+            echo "::notice::✅ Today's aggregated data exists"
+          else
+            echo "data_exists=false" >> $GITHUB_OUTPUT
+            echo "::warning::⚠️  No aggregated data for today"
+          fi
+          
+          # Check last data commit time
+          LAST_DATA_COMMIT=$(git log -1 --grep="chore(data):" --pretty=format:"%cr")
+          echo "last_commit=$LAST_DATA_COMMIT" >> $GITHUB_OUTPUT
+          echo "::notice::Last data commit: $LAST_DATA_COMMIT"
+
+      - name: Check report freshness
+        id: report_check
+        run: |
+          LATEST_REPORT=$(ls -t docs/reports/pulse-*.md 2>/dev/null | head -1)
+          
+          if [ -z "$LATEST_REPORT" ]; then
+            echo "report_exists=false" >> $GITHUB_OUTPUT
+            echo "::warning::⚠️  No reports found"
+          else
+            REPORT_DATE=$(basename "$LATEST_REPORT" .md | sed 's/pulse-//')
+            TODAY=$(date -u '+%Y-%m-%d')
+            
+            if [ "$REPORT_DATE" == "$TODAY" ]; then
+              echo "report_exists=true" >> $GITHUB_OUTPUT
+              echo "report_current=true" >> $GITHUB_OUTPUT
+              echo "::notice::✅ Today's report exists"
+            else
+              echo "report_exists=true" >> $GITHUB_OUTPUT
+              echo "report_current=false" >> $GITHUB_OUTPUT
+              echo "::warning::⚠️  Latest report is from ${REPORT_DATE} (not today)"
+            fi
+          fi
+
+      - name: Check GitHub Pages deployment
+        id: pages_check
+        run: |
+          # Test if GitHub Pages is accessible
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://grumpified-oggvct.github.io/ollama_pulse/ || echo "000")
+          
+          if [ "$HTTP_CODE" == "200" ]; then
+            echo "pages_up=true" >> $GITHUB_OUTPUT
+            echo "::notice::✅ GitHub Pages is accessible"
+          else
+            echo "pages_up=false" >> $GITHUB_OUTPUT
+            echo "::warning::⚠️  GitHub Pages returned HTTP $HTTP_CODE"
+          fi
+
+      - name: Analyze workflow health
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_PAT }}
+          script: |
+            const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+            
+            const workflows = ['ingest.yml', 'morning_report.yml', 'afternoon_report.yml'];
+            let allHealthy = true;
+            
+            for (const workflow of workflows) {
+              const { data } = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: workflow,
+                created: `>=${twelveHoursAgo}`,
+                per_page: 10
+              });
+              
+              const runs = data.workflow_runs;
+              const failures = runs.filter(r => r.conclusion === 'failure');
+              
+              if (failures.length >= 3) {
+                core.warning(`${workflow} has ${failures.length} failures in last 12 hours`);
+                allHealthy = false;
+              }
+            }
+            
+            core.setOutput('all_healthy', allHealthy);
+
+      - name: Create issue on health problems
+        if: steps.data_check.outputs.data_exists == 'false' || steps.report_check.outputs.report_current == 'false' || steps.pages_check.outputs.pages_up == 'false'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_PAT }}
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'health-check',
+              state: 'open'
+            });
+            
+            // Don't create duplicate issues
+            if (issues.data.length > 0) {
+              console.log('Health check issue already exists');
+              return;
+            }
+            
+            let body = '## System Health Issues Detected\n\n';
+            body += '**Detected by**: Automated health check workflow\n';
+            body += `**Time**: ${new Date().toISOString()}\n\n`;
+            body += '### Issues Found:\n\n';
+            
+            if ('${{ steps.data_check.outputs.data_exists }}' === 'false') {
+              body += '- ⚠️  No aggregated data for today\n';
+            }
+            
+            if ('${{ steps.report_check.outputs.report_current }}' === 'false') {
+              body += '- ⚠️  No current report for today\n';
+            }
+            
+            if ('${{ steps.pages_check.outputs.pages_up }}' === 'false') {
+              body += '- ⚠️  GitHub Pages not accessible\n';
+            }
+            
+            body += '\n### Recommended Actions:\n\n';
+            body += '1. Check recent workflow runs in Actions tab\n';
+            body += '2. Verify all secrets are configured correctly\n';
+            body += '3. Manually trigger affected workflows\n';
+            body += '4. Check [workflow status](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions)\n';
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 System Health Check Failed',
+              body: body,
+              labels: ['health-check', 'automated']
+            });
+        continue-on-error: true
+
+      - name: Health summary
+        if: always()
+        run: |
+          echo "### 🏥 System Health Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.data_check.outputs.data_exists }}" == "true" ]; then
+            echo "| Aggregated Data | ✅ Exists |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Aggregated Data | ⚠️  Missing |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ steps.report_check.outputs.report_current }}" == "true" ]; then
+            echo "| Current Report | ✅ Up to date |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Current Report | ⚠️  Outdated |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ steps.pages_check.outputs.pages_up }}" == "true" ]; then
+            echo "| GitHub Pages | ✅ Accessible |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| GitHub Pages | ⚠️  Down |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Last data commit**: ${{ steps.data_check.outputs.last_commit }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Site**: https://grumpified-oggvct.github.io/ollama_pulse" >> $GITHUB_STEP_SUMMARY
+

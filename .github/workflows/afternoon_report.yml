@@ -2,11 +2,18 @@ name: Ollama Pulse Afternoon Report (16:30 CT)
 
 on:
   schedule:
-    - cron: '30 21 * * *'   # 16:30 CDT/CST (UTC-5/-6)
+    # DST-aware dual schedule (handles both CDT and CST)
+    - cron: '30 21 * * *'   # 16:30 CDT (summer)
+    - cron: '30 22 * * *'   # 16:30 CST (winter)
   workflow_dispatch:
     inputs:
       force_run:
         description: 'Force run even if not 16:30 CT'
+        required: false
+        default: 'false'
+        type: boolean
+      skip_data_check:
+        description: 'Skip data freshness validation'
         required: false
         default: 'false'
         type: boolean
@@ -23,6 +30,7 @@ concurrency:
 jobs:
   afternoon_report:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -38,22 +46,63 @@ jobs:
           cache: 'pip'
           cache-dependency-path: requirements.txt
 
+      - name: Cache ML models
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/huggingface
+          key: ${{ runner.os }}-huggingface-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-huggingface-
+
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          echo "::notice::Dependencies installed successfully"
+
+      - name: Validate secrets
+        run: |
+          if [ -z "${{ secrets.OLLAMA_API_KEY }}" ]; then
+            echo "::error::OLLAMA_API_KEY secret is not configured"
+            exit 1
+          fi
+          echo "::notice::All required secrets are configured"
 
       - name: Gate by Chicago local time (ensure 16:30 CT)
         if: ${{ !inputs.force_run }}
         env:
           TZ: America/Chicago
         run: |
-          echo "Local time: $(date)"
+          echo "Current UTC time: $(TZ=UTC date '+%Y-%m-%d %H:%M:%S %Z')"
+          echo "Current CT time: $(date '+%Y-%m-%d %H:%M:%S %Z')"
+          
           HOUR=$(date +%H)
           MINUTE=$(date +%M)
+          
           if [ "$HOUR" != "16" ] || [ "$MINUTE" -lt "30" ] || [ "$MINUTE" -gt "45" ]; then
-            echo "::warning::Not 16:30 CT (current: ${HOUR}:${MINUTE}) – skipping"
+            echo "::warning::Not 16:30 CT window (current: ${HOUR}:${MINUTE} CT) - skipping"
+            echo "::notice::This cron run was for DST coverage - the other schedule will handle it"
             exit 0
           fi
-          echo "✓ Time gate passed: 16:30 CT"
+          
+          echo "::notice::✓ Time gate passed: ${HOUR}:${MINUTE} CT"
+
+      - name: Validate data freshness
+        if: ${{ !inputs.skip_data_check }}
+        run: |
+          LATEST_DATA_COMMIT=$(git log --all --since="90 minutes ago" --grep="chore(data):" --pretty=format:"%H" | head -1)
+          
+          if [ -z "$LATEST_DATA_COMMIT" ]; then
+            echo "::warning::No data ingestion in last 90 minutes - data may be stale"
+            TODAY=$(date -u '+%Y-%m-%d')
+            if [ ! -f "data/aggregated/${TODAY}.json" ]; then
+              echo "::error::No aggregated data for today - cannot generate report"
+              exit 1
+            fi
+            echo "::notice::Today's data file exists - proceeding with caution"
+          else
+            echo "::notice::✓ Fresh data available (commit: ${LATEST_DATA_COMMIT})"
+          fi
 
       - name: Generate afternoon report
         env:
@@ -62,8 +111,14 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           cd scripts
+          echo "::group::Generating report"
           python generate_report.py
+          echo "::endgroup::"
+          
+          echo "::group::Updating index"
           python update_index.py
+          echo "::endgroup::"
+          
           echo "::notice::Afternoon report generated and index updated"
 
       - name: Post report to Nostr
@@ -72,17 +127,21 @@ jobs:
           NOSTR_PRIVATE_KEY: ${{ secrets.NOSTR_PRIVATE_KEY }}
         run: |
           cd scripts
-          python post_to_nostr.py
-          echo "::notice::Report posted to Nostr"
+          python post_to_nostr.py || {
+            echo "::warning::Nostr posting failed - report still saved locally"
+            exit 0
+          }
+          echo "::notice::Report posted to Nostr successfully"
         continue-on-error: true
 
       - name: Commit and push report
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "feat(report): afternoon Ollama Pulse $(date -u '+%Y-%m-%d %H:%M')"
+          commit_message: "feat(report): afternoon Ollama Pulse ${{ github.run_id }}"
           file_pattern: 'docs/**'
           commit_user_name: Ollama Pulse Bot
           commit_user_email: pulse@ollama-pulse.github.io
+          push_options: '--force-with-lease'
 
       - name: Upload report artifact
         if: always()
@@ -92,4 +151,23 @@ jobs:
           path: docs/reports/
           retention-days: 7
           if-no-files-found: warn
+
+      - name: Performance metrics
+        if: always()
+        run: |
+          END_TIME=$(date +%s)
+          START_TIME=${{ github.event.created_at }}
+          DURATION=$((END_TIME - $(date -d "$START_TIME" +%s)))
+          echo "::notice::Workflow duration: ${DURATION}s"
+          echo "duration_seconds=${DURATION}" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Workflow summary
+        if: always()
+        run: |
+          echo "### 📊 Afternoon Report Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time**: $(TZ=America/Chicago date '+%H:%M %Z')" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Report generation completed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Reports**: [View on GitHub Pages](https://grumpified-oggvct.github.io/ollama_pulse)" >> $GITHUB_STEP_SUMMARY
 
