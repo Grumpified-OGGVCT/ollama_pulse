@@ -585,7 +585,8 @@ def select_model_for_task(
     has_visual_input: bool = False,
     requires_long_context: bool = False,
     requires_coding: bool = False,
-    requires_reasoning: bool = False
+    requires_reasoning: bool = False,
+    for_data_collection: bool = False
 ) -> str:
     """
     Intelligent model selection based on task requirements
@@ -596,11 +597,16 @@ def select_model_for_task(
         requires_long_context: Whether task needs >128K context
         requires_coding: Whether task involves code generation
         requires_reasoning: Whether task needs deep logical reasoning
+        for_data_collection: Use instruction-tuned model for factual data (less hallucination)
     
     Returns:
         model_id: The optimal model for the task
     """
-    # Visual tasks ALWAYS use Qwen3-VL
+    # Data collection uses instruction-tuned Qwen3-VL (better instruction following, less hallucination)
+    if for_data_collection:
+        return "qwen3-vl:235b-instruct-cloud"
+    
+    # Visual tasks use Qwen3-VL
     if has_visual_input:
         return "qwen3-vl:235b-cloud"
     
