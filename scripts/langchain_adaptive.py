@@ -1,25 +1,38 @@
 #!/usr/bin/env python3
-"""LangChain Adaptive Intelligence - RAG-powered prophecy generation with vector embeddings"""
+"""LangChain Adaptive Intelligence - RAG-powered prophecy generation with vector embeddings
+
+NOW CLOUD-COMPATIBLE: Uses official Ollama Python library for cloud API access
+"""
 import json
+import os
 import sqlite3
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 
 try:
-    from langchain_ollama import ChatOllama, OllamaEmbeddings
-    from langchain_core.prompts import PromptTemplate
+    from ollama import Client as OllamaClient
     from langchain_community.vectorstores import Chroma
     from langchain_core.documents import Document
+    from langchain_community.embeddings import OllamaEmbeddings
     AVAILABLE = True
 except ImportError:
     AVAILABLE = False
 
 class AdaptiveProphecyEngine:
-    """RAG-powered intelligence engine with vector embeddings and historical context"""
+    """RAG-powered intelligence engine with vector embeddings and historical context
+    
+    NOW CLOUD-COMPATIBLE: Uses Ollama Cloud API with authentication
+    """
 
-    def __init__(self, ollama_url="http://127.0.0.1:11434", model="llama3.2", embedding_model="mxbai-embed-large", db_path="data/review_history.db"):
+    def __init__(self, 
+                 ollama_url="https://ollama.com", 
+                 api_key=None,
+                 model="gpt-oss:120b-cloud",  # Cloud model for prophecy generation
+                 embedding_model="nomic-embed-text",  # Cloud embedding model
+                 db_path="data/review_history.db"):
         self.ollama_url = ollama_url
+        self.api_key = api_key or os.getenv("OLLAMA_API_KEY") or os.getenv("OLLAMA_TURBO_CLOUD_API_KEY")
         self.model = model
         self.embedding_model = embedding_model
         self.db_path = Path(db_path)
@@ -29,24 +42,34 @@ class AdaptiveProphecyEngine:
         self.persist_directory = Path("data/chroma_db")
 
     def initialize(self):
-        """Initialize LangChain components with vector store"""
+        """Initialize components with Ollama Cloud API (official client)"""
         if not AVAILABLE:
-            print("⚠️  LangChain not available - install langchain-ollama, langchain-community, chromadb")
+            print("⚠️  Required packages not available - install: pip install ollama langchain-community chromadb")
+            return False
+
+        if not self.api_key:
+            print("⚠️  OLLAMA_API_KEY not found - RAG engine disabled")
             return False
 
         try:
-            # Initialize LLM
-            self.llm = ChatOllama(
-                base_url=self.ollama_url,
-                model=self.model,
-                temperature=0.7
+            # Initialize Ollama Client for cloud (official library per docs.ollama.com/cloud)
+            self.llm = OllamaClient(
+                host=self.ollama_url,
+                headers={'Authorization': f'Bearer {self.api_key}'}
             )
+            print(f"✅ Ollama Cloud client initialized: {self.ollama_url}")
 
-            # Initialize embeddings with proper embedding model
+            # For embeddings, use the OllamaEmbeddings wrapper but configure for cloud
+            # Note: This uses the ollama library under the hood
             self.embeddings = OllamaEmbeddings(
                 base_url=self.ollama_url,
-                model=self.embedding_model
+                model=self.embedding_model,
+                # Pass API key via environment (OllamaEmbeddings reads OLLAMA_HOST)
             )
+            print(f"✅ Embeddings initialized: {self.embedding_model}")
+            
+            # Ensure API key is in environment for embeddings
+            os.environ['OLLAMA_API_KEY'] = self.api_key
 
             # Initialize or load vector store
             self.persist_directory.mkdir(parents=True, exist_ok=True)
@@ -257,9 +280,9 @@ Commentary: {commentary or 'No commentary available'}
             print(f"⚠️  Cleanup warning: {e}")
 
     def generate_prophecy(self, cluster_summary: str, past_yield: Dict, use_rag: bool = True) -> Dict:
-        """Generate prophecy with RAG-enhanced context"""
+        """Generate prophecy with RAG-enhanced context using Ollama Cloud"""
         if not self.llm:
-            return {"prophecy": "LangChain not initialized", "confidence": "UNAVAILABLE"}
+            return {"prophecy": "Ollama client not initialized", "confidence": "UNAVAILABLE"}
 
         try:
             # Build context from vector store if RAG enabled
@@ -276,10 +299,8 @@ Commentary: {commentary or 'No commentary available'}
                     for i, doc in enumerate(results, 1):
                         rag_context += f"\n{i}. {doc.page_content.strip()}\n"
 
-            # Create prompt
-            prompt = PromptTemplate(
-                input_variables=["cluster_summary", "past_yield", "rag_context"],
-                template="""You are EchoVein, the vein-tapping oracle of the Ollama ecosystem.
+            # Build prompt (official Ollama API format per docs.ollama.com/cloud)
+            prompt = f"""You are EchoVein, the vein-tapping oracle of the Ollama ecosystem.
 
 Based on the following cluster analysis and historical context, generate a brief prophecy about where the ecosystem is heading.
 
@@ -287,7 +308,7 @@ Based on the following cluster analysis and historical context, generate a brief
 {cluster_summary}
 
 **Past Yield Insights:**
-{past_yield}
+{json.dumps(past_yield, indent=2)}
 
 {rag_context}
 
@@ -295,17 +316,19 @@ Generate a 2-3 sentence prophecy in EchoVein's style (vein-tapping, blood metaph
 Focus on actionable predictions and emerging patterns.
 
 Prophecy:"""
+
+            # Generate using official Ollama client (per docs.ollama.com/cloud)
+            response = self.llm.chat(
+                model=self.model,
+                messages=[{
+                    'role': 'user',
+                    'content': prompt
+                }],
+                stream=False  # Get full response
             )
 
-            # Generate prophecy
-            chain = prompt | self.llm
-            response = chain.invoke({
-                "cluster_summary": cluster_summary,
-                "past_yield": json.dumps(past_yield, indent=2),
-                "rag_context": rag_context
-            })
-
-            prophecy_text = response.content if hasattr(response, 'content') else str(response)
+            # Extract prophecy text from response
+            prophecy_text = response['message']['content']
 
             # Determine confidence based on RAG context availability
             confidence = "HIGH" if rag_context else "MEDIUM"
@@ -313,7 +336,8 @@ Prophecy:"""
             return {
                 "prophecy": prophecy_text.strip(),
                 "confidence": confidence,
-                "rag_enabled": use_rag and bool(rag_context)
+                "rag_enabled": use_rag and bool(rag_context),
+                "model_used": self.model
             }
 
         except Exception as e:
