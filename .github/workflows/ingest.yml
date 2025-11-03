@@ -102,7 +102,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ingestion-${{ matrix.script.name }}-${{ github.run_number }}
-          path: data/
+          path: data/${{ matrix.script.name }}/
           retention-days: 1
           if-no-files-found: warn
 
@@ -141,8 +141,32 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: ingestion-*
-          path: data/
-          merge-multiple: true
+          path: ./artifacts/
+          merge-multiple: false
+      
+      - name: Merge artifacts into data directory
+        run: |
+          # Manually merge all artifacts into data/ directory
+          for artifact_dir in artifacts/ingestion-*/; do
+            if [ -d "$artifact_dir" ]; then
+              echo "Merging $artifact_dir"
+              cp -r "$artifact_dir"* data/ 2>/dev/null || true
+            fi
+          done
+          
+          # Show what we have
+          echo "Data directory structure:"
+          ls -la data/*/
+          
+          # Verify today's files exist
+          TODAY=$(date -u '+%Y-%m-%d')
+          for dir in official community tools bounties nostr stackoverflow models releases devblogs discord manual; do
+            if [ -f "data/${dir}/${TODAY}.json" ]; then
+              echo "Found: data/${dir}/${TODAY}.json"
+            else
+              echo "Missing: data/${dir}/${TODAY}.json (may be empty)"
+            fi
+          done
 
       - name: Aggregate data
         env:
