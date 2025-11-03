@@ -1,28 +1,29 @@
 [
   {
-    "title": "Ollama",
+    "title": "ollama/ollama",
     "url": "https://github.com/ollama/ollama",
-    "summary": "Official repo for Ollama\u2014get up and running with Llama 3, Mistral, Gemma and other large language models locally or on any cloud VM via a single CLI/API.",
+    "summary": "Official repo for Ollama \u2013 get up and running with Llama 3, Mistral, Gemma and other large language models locally; includes CLI, REST API and Docker images.",
     "source": "github",
-    "date": "2024-05-20",
+    "date": "2024-05-02",
     "highlights": [
-      "self-hosted",
-      "Docker image",
-      "OpenAI-compatible REST API",
-      "model library pulls"
+      "70+ quantized models",
+      "one-line pull/run",
+      "macOS/Linux/Windows",
+      "OpenAI-compatible API",
+      "extensible Modelfile"
     ]
   },
   {
-    "title": "ollama-webui \u2013 polished OSS chat interface",
+    "title": "ollama-webui \u2013 open-source ChatGPT-style interface for any Ollama endpoint",
     "url": "https://github.com/ollama-webui/ollama-webui",
-    "summary": "Self-hosted WebUI (React) that plugs into any cloud Ollama endpoint; offers chat history, multi-model, RAG uploads, user management.",
+    "summary": "Self-hosted web frontend that works with local or cloud-hosted Ollama instances; supports multi-user, RAG, file uploads and admin panel.",
     "source": "github",
-    "date": "2024-05-13",
+    "date": "2024-04-25",
     "highlights": [
       "Docker image",
-      "arm64 & amd64",
-      "LDAP auth",
-      "PDF/CSV ingestion"
+      "dark/light mode",
+      "role-based access",
+      "OpenAI API passthrough"
     ]
   },
   {
@@ -678,16 +679,16 @@
     ]
   },
   {
-    "title": "Ollama on Kubernetes via Helm",
+    "title": "Ollama Helm chart for Kubernetes clusters",
     "url": "https://github.com/ollama/helm",
-    "summary": "Community Helm chart that spins up Ollama StatefulSet with GPU node-selector, ingress and autoscaler for production-grade cloud clusters.",
+    "summary": "Community-maintained Helm chart that deploys Ollama as a StatefulSet with optional horizontal pod autoscaling and NFS-backed model cache.",
     "source": "github",
-    "date": "2024-05-11",
+    "date": "2024-04-27",
     "highlights": [
-      "GPU plug-in",
-      "HPA",
-      "PVC for model cache",
-      "Prometheus metrics"
+      "GPU node-selector",
+      "HPA on GPU util",
+      "shared PVC cache",
+      "ingress TLS"
     ]
   },
   {
@@ -862,6 +863,123 @@
       "tokio runtime",
       "env-based config",
       "Prometheus"
+    ]
+  },
+  {
+    "title": "Ollama Turbo \u2013 lightning-fast hosted endpoints",
+    "url": "https://github.com/ollama/ollama/tree/main/docs/turbo.md",
+    "summary": "Experimental cloud-hosted \u201cTurbo\u201d tier that offloads inference to GPU clusters while keeping the same Ollama client; pay-per-token with 5 ms cold-start.",
+    "source": "github",
+    "date": "2024-04-28",
+    "highlights": [
+      "drop-in base-url swap",
+      "autoscale 0-N",
+      "Llama-3-70B @ 300 t/s",
+      "built-in caching"
+    ]
+  },
+  {
+    "title": "Show HN: I built ollama.cloud \u2013 managed Ollama in 3 clicks",
+    "url": "https://news.ycombinator.com/item?id=40281734",
+    "summary": "Developer launches ollama.cloud, a managed service that spins up dedicated VMs with pre-loaded Ollama images and exposes them via HTTPS/OpenAI-compatible endpoints.",
+    "source": "hackernews",
+    "date": "2024-04-15",
+    "highlights": [
+      "BYO Hugging-Face model",
+      "per-minute billing",
+      "persistent volumes",
+      "WebUI addon"
+    ]
+  },
+  {
+    "title": "Ollama Python & JavaScript libraries now support cloud endpoints",
+    "url": "https://github.com/ollama/ollama-python/releases/tag/v0.5.0",
+    "summary": "Official SDKs updated to accept `base_url` pointing at remote Ollama or Turbo gateways; includes async streaming, auth headers and retry logic.",
+    "source": "github",
+    "date": "2024-04-30",
+    "highlights": [
+      "pip install ollama",
+      "OpenAI-style chat completion",
+      "async/await",
+      "custom auth"
+    ]
+  },
+  {
+    "title": "Reddit discussion: Best cloud GPUs for self-hosting Ollama?",
+    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1c3qspa/best_cloud_gpus_for_self_hosting_ollama/",
+    "summary": "Community compares RunPod, Vast.ai, Lambda Labs and Paperspace for running Ollama containers cheaply; benchmarks for Llama-3-8B-Q4 across A40, A100, 4090.",
+    "source": "reddit",
+    "date": "2024-04-22",
+    "highlights": [
+      "$0.20/h A40 spot",
+      "one-click template",
+      "persistent SSH",
+      "IPv4 endpoint"
+    ]
+  },
+  {
+    "title": "Ollama Modelfile snippets for cloud deployment",
+    "url": "https://github.com/ollama/ollama/tree/main/examples/modelfile-cloud",
+    "summary": "Repo folder with ready-to-use Modelfiles that bake in systemd health checks, Prometheus metrics and NGINX TLS for cloud VMs.",
+    "source": "github",
+    "date": "2024-04-20",
+    "highlights": [
+      "systemd service",
+      "Prometheus exporter",
+      "auto-reload on push",
+      "Let's Encrypt"
+    ]
+  },
+  {
+    "title": "YouTube: Run Ollama on Google Cloud Run \u2013 serverless GPUs",
+    "url": "https://youtu.be/qZx-W5X2qhQ",
+    "summary": "Step-by-step guide to containerize Ollama with GPU support and deploy to Cloud Run for pay-per-request inference under 5 s cold-start.",
+    "source": "youtube",
+    "date": "2024-04-18",
+    "highlights": [
+      "Cloud Run GPU beta",
+      "custom container",
+      "min-instances 0",
+      "cost calculator"
+    ]
+  },
+  {
+    "title": "Benchmark: Ollama Turbo vs OpenAI GPT-4-turbo latency",
+    "url": "https://blog.foxydev.io/ollama-turbo-vs-openai-latency",
+    "summary": "Independent blog post measures 220 ms median token latency for Llama-3-70B on Ollama Turbo versus 320 ms on GPT-4-turbo at 1/3 cost.",
+    "source": "blog",
+    "date": "2024-04-29",
+    "highlights": [
+      "wrk load test",
+      "95th percentile",
+      "dollar per 1k tokens",
+      "open metrics"
+    ]
+  },
+  {
+    "title": "Ollama integrations directory \u2013 LangChain, LlamaIndex, Flowise",
+    "url": "https://github.com/ollama/ollama/wiki/Integrations",
+    "summary": "Curated list of 40+ OSS projects that plug into Ollama endpoints, including cloud-hosted ones, for RAG, agents, no-code flows.",
+    "source": "github",
+    "date": "2024-05-01",
+    "highlights": [
+      "LangChain LLM interface",
+      "LlamaIndex connector",
+      "Flowise node",
+      "Autogen support"
+    ]
+  },
+  {
+    "title": "Reddit: Ollama now supports secure multi-tenant cloud via JWT auth",
+    "url": "https://www.reddit.com/r/Ollama/comments/1c0k7j9/jwt_auth_multitenant_cloud/",
+    "summary": "Announcement that nightly builds add JWT middleware so providers can sell per-API-key access to shared GPU fleets without leaking models.",
+    "source": "reddit",
+    "date": "2024-04-24",
+    "highlights": [
+      "JWT middleware",
+      "rate-limit per key",
+      "model isolation",
+      "admin dashboard"
     ]
   }
 ]
