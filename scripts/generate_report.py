@@ -25,6 +25,13 @@ except ImportError:
     ENHANCED_GENERATION_AVAILABLE = False
     print('⚠️  Enhanced generation not available - using template mode')
 
+# Import navigation menu system
+try:
+    from navigation_menu import generate_navigation_menu, generate_section_header, generate_back_to_top, get_navigation_css
+    NAVIGATION_AVAILABLE = True
+except ImportError:
+    NAVIGATION_AVAILABLE = False
+
 
 DOCS_DIR = Path("../docs")
 REPORTS_DIR = DOCS_DIR / "reports"
@@ -39,7 +46,12 @@ def ensure_reports_dir():
 
 
 def get_today_date_str():
-    return datetime.now().strftime("%Y-%m-%d")
+    """Get today's date in UTC to match GitHub Actions timezone"""
+    from datetime import datetime
+    import pytz
+    # Use UTC for consistency with GitHub Actions
+    utc = pytz.UTC
+    return datetime.now(utc).strftime("%Y-%m-%d")
 
 
 def load_data():
