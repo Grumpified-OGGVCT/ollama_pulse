@@ -1,15 +1,15 @@
 [
   {
-    "title": "ollama/ollama \u2013 GitHub",
+    "title": "ollama/ollama",
     "url": "https://github.com/ollama/ollama",
-    "summary": "Official repo for Ollama: run Llama 3, Mistral, Gemma and other large language models locally with a single command. Includes Docker image and REST API.",
+    "summary": "Official GitHub repo for Ollama: run Llama 2, Mistral, Gemma and other large language models locally with a simple CLI and REST API.",
     "source": "github",
-    "date": "2024-05-15",
+    "date": "2024-05-17",
     "highlights": [
-      "docker",
-      "REST API",
-      "local inference",
-      "Modelfile"
+      "CLI pull/run",
+      "REST & OpenAI-compatible endpoints",
+      "macOS/Linux/Windows",
+      "Docker image"
     ]
   },
   {
@@ -51,16 +51,15 @@
     ]
   },
   {
-    "title": "LangChain + Ollama integration docs",
+    "title": "Ollama + LangChain integration docs",
     "url": "https://python.langchain.com/docs/integrations/llms/ollama",
-    "summary": "Step-by-step guide to use Ollama models inside LangChain chains, agents and retrieval pipelines; includes streaming and JSON mode.",
+    "summary": "LangChain official guide: use Ollama as the LLM backend for chains, agents, retrieval QA, tool calling.",
     "source": "blog",
-    "date": "2024-05-11",
+    "date": "2024-05-15",
     "highlights": [
-      "LangChain",
+      "LangChain LLM/ChatOllama",
       "streaming",
-      "JSON mode",
-      "RAG"
+      "function calling beta"
     ]
   },
   {
@@ -129,15 +128,15 @@
     ]
   },
   {
-    "title": "Ollama Model Library \u2013 official registry",
+    "title": "Ollama open-source models library",
     "url": "https://ollama.com/library",
-    "summary": "Curated registry of 100+ ready-to-run GGUF models (Llama 3, Phi-3, Mistral, CodeLlama, etc.) with one-line pull commands and parameter notes.",
+    "summary": "Official registry of 100+ pre-quantized models (Llama-3, Phi-3, Mistral, Gemma, CodeLlama, etc.) ready for one-line pull.",
     "source": "blog",
-    "date": "2024-05-14",
+    "date": "2024-05-18",
     "highlights": [
-      "GGUF",
-      "one-line pull",
-      "100+ models"
+      "ollama pull llama3",
+      "tags for 3B\u219270B sizes",
+      "auto-updates"
     ]
   },
   {
@@ -156,25 +155,25 @@
   {
     "title": "Ollama Python & JavaScript libraries",
     "url": "https://github.com/ollama/ollama-python",
-    "summary": "Official PyPI package to pull, push and chat with any Ollama model from Python; includes async client and streaming support.",
+    "summary": "Official Python SDK for Ollama; install via pip and chat with any local model in two lines of code.",
     "source": "github",
-    "date": "2024-05-12",
+    "date": "2024-05-15",
     "highlights": [
-      "PyPI",
-      "async",
-      "streaming"
+      "pip install ollama",
+      "chat/embedding helpers",
+      "streaming support"
     ]
   },
   {
-    "title": "Ollama-js \u2013 npm wrapper",
+    "title": "Ollama-js \u2013 JavaScript/TypeScript client",
     "url": "https://github.com/ollama/ollama-js",
-    "summary": "Official npm package providing the same API surface as the Python client for Node/Browser use, works against local or cloud endpoints.",
+    "summary": "Official JavaScript/TypeScript client for Ollama; works in Node, Deno, Bun and browsers (via proxy).",
     "source": "github",
-    "date": "2024-05-09",
+    "date": "2024-05-14",
     "highlights": [
-      "npm",
-      "browser",
-      "cloud endpoint"
+      "npm install ollama",
+      "browser support",
+      "Promise & stream APIs"
     ]
   },
   {
@@ -230,15 +229,15 @@
     ]
   },
   {
-    "title": "Ollama Helm Chart for Kubernetes",
+    "title": "Ollama on Kubernetes Helm chart",
     "url": "https://github.com/otwld/ollama-helm",
-    "summary": "Production-ready Helm chart with autoscaling, PVC, and optional cloud GPU node-affinity for running Ollama in k8s clusters.",
+    "summary": "Community Helm chart to deploy Ollama (with optional WebUI) on K8s, supports GPU nodeSelector and HPA.",
     "source": "github",
-    "date": "2024-05-01",
+    "date": "2024-05-13",
     "highlights": [
-      "Helm",
-      "autoscaling",
-      "GPU node-affinity"
+      "helm install ollama",
+      "GPU workloads",
+      "ingress, PVC"
     ]
   },
   {
@@ -403,15 +402,112 @@
     ]
   },
   {
-    "title": "Ollama Modelfile deep-dive \u2013 creating custom models",
+    "title": "Ollama Modelfile docs",
     "url": "https://github.com/ollama/ollama/blob/main/docs/modelfile.md",
-    "summary": "Official documentation explaining how to write a Modelfile to bundle weights, system prompts, temperature and tensor-split options for sharing.",
+    "summary": "Reference for writing custom Modelfiles to package, quantize and distribute your own GGUF models through Ollama.",
     "source": "github",
-    "date": "2024-05-09",
+    "date": "2024-05-16",
     "highlights": [
-      "Modelfile",
-      "system prompt",
-      "tensor-split"
+      "FROM/PARAMETER/TEMPLATE syntax",
+      "quantization flags",
+      "push to registry"
+    ]
+  },
+  {
+    "title": "Ollama Docker image & docker-compose recipes",
+    "url": "https://hub.docker.com/r/ollama/ollama",
+    "summary": "Official container image with GPU (CUDA/ROCm) and CPU runners; includes example compose stacks with WebUI.",
+    "source": "github",
+    "date": "2024-05-17",
+    "highlights": [
+      "docker run ollama/ollama",
+      "CUDA/ROCm tags",
+      "compose + Open-WebUI"
+    ]
+  },
+  {
+    "title": "Open-WebUI (ex Ollama-WebUI) \u2013 full-featured web frontend",
+    "url": "https://github.com/open-webui/open-webui",
+    "summary": "Most popular open-source web interface for Ollama: chat UI, RAG, user auth, admin panel, mobile friendly.",
+    "source": "github",
+    "date": "2024-05-18",
+    "highlights": [
+      "drop-in replacement for ChatGPT UI",
+      "document Q&A",
+      "LDAP/oauth",
+      "dark mode"
+    ]
+  },
+  {
+    "title": "ollama-chat \u2013 Raycast extension",
+    "url": "https://github.com/raycast/extensions/tree/main/extensions/ollama-chat",
+    "summary": "Raycast extension that lets you chat with any local Ollama model from the macOS launcher.",
+    "source": "github",
+    "date": "2024-05-12",
+    "highlights": [
+      "Raycast quick-chat",
+      "command-bar interface",
+      "configurable model"
+    ]
+  },
+  {
+    "title": "Ollama for VS Code \u2013 \u2018continue\u2019 extension",
+    "url": "https://github.com/continuedev/continue",
+    "summary": "VS Code extension that adds local LLM code completion and chat via Ollama (supports Llama-3, CodeLlama, etc.).",
+    "source": "github",
+    "date": "2024-05-16",
+    "highlights": [
+      "inline autocomplete",
+      "/chat panel",
+      "open-source"
+    ]
+  },
+  {
+    "title": "Ollama-LiteLLM proxy \u2013 OpenAI-compatible cloud endpoint",
+    "url": "https://github.com/BerriAI/litellm",
+    "summary": "LiteLLM server lets you expose any Ollama model as a cloud-hosted, OpenAI-compatible API with key-based auth.",
+    "source": "github",
+    "date": "2024-05-14",
+    "highlights": [
+      "litellm --model ollama/llama3",
+      "/v1/chat/completions",
+      "auto-scaling"
+    ]
+  },
+  {
+    "title": "Reddit r/ollama \u2013 community tips & model benchmarks",
+    "url": "https://reddit.com/r/ollama",
+    "summary": "Active subreddit for troubleshooting, custom Modelfiles, speed benchmarks and ecosystem announcements.",
+    "source": "reddit",
+    "date": "2024-05-18",
+    "highlights": [
+      "user benchmarks",
+      "Modelfile recipes",
+      "GPU VRAM tables"
+    ]
+  },
+  {
+    "title": "Ollama Ruby SDK \u2013 ollama-ai gem",
+    "url": "https://github.com/ollama-ai/ollama-rb",
+    "summary": "Unofficial but feature-complete Ruby gem for chatting and embedding with local Ollama models.",
+    "source": "github",
+    "date": "2024-05-11",
+    "highlights": [
+      "gem install ollama-ai",
+      "streaming blocks",
+      "embedding support"
+    ]
+  },
+  {
+    "title": "Ollama Turbo API \u2013 community cloud endpoint",
+    "url": "https://github.com/grayoj/ollama-turbo",
+    "summary": "Lightweight proxy that adds JWT auth, per-key rate limits and usage logs on top of Ollama for SaaS scenarios.",
+    "source": "github",
+    "date": "2024-05-10",
+    "highlights": [
+      "JWT auth",
+      "rate limiting",
+      "usage dashboard"
     ]
   }
 ]
