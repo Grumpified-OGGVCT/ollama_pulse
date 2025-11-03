@@ -109,7 +109,7 @@ def aggregate_data():
     model_registry = load_source_data("model_registry")  # Fixed - was models/
     releases = load_source_data("releases")
     devblogs = load_source_data("devblogs")
-    discord = load_source_data("discord")
+    social_media = load_source_data("social_media")  # Replaced discord - X, Instagram, Facebook
     manual = load_source_data("manual")
 
     print(f"  📊 Official: {len(official)} entries")
@@ -123,12 +123,12 @@ def aggregate_data():
     print(f"  🤖 Model Registry: {len(model_registry)} entries")
     print(f"  📦 Releases: {len(releases)} entries")
     print(f"  📝 Dev Blogs: {len(devblogs)} entries")
-    print(f"  🎮 Discord: {len(discord)} entries")
+    print(f"  📱 Social Media: {len(social_media)} entries")
     print(f"  ⭐ Manual Tracking: {len(manual)} entries")
 
     # Combine all
     all_entries = (official + cloud + community + tools + bounties + nostr +
-                   issues + stackoverflow + model_registry + releases + devblogs + discord + manual)
+                   issues + stackoverflow + model_registry + releases + devblogs + social_media + manual)
     
     # Deduplicate by URL (handle entries without URL gracefully)
     unique_dict = {}
