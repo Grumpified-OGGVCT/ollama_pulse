@@ -2,247 +2,261 @@
   {
     "title": "ollama/ollama",
     "url": "https://github.com/ollama/ollama",
-    "summary": "Official Ollama repo: get up and running with Llama 3, Mistral, Gemma, and other large language models locally.",
+    "summary": "Official Ollama repo: self-host LLMs (Llama 2, Mistral, Gemma\u2026) with a single CLI or REST API; ships macOS/Linux binaries and Docker images.",
     "source": "github",
-    "date": "2024-05-10",
+    "date": "2024-04-18",
     "highlights": [
-      "self-contained binary",
-      "macOS/Linux/Windows",
-      "Docker image",
-      "REST & CLI APIs"
+      "built-in model library",
+      "OpenAI-compatible API",
+      "GPU/CPU fallback",
+      "Modelfile DSL"
     ]
   },
   {
     "title": "ollama-python",
     "url": "https://github.com/ollama/ollama-python",
-    "summary": "Official Python library for Ollama: chat, generate, embed, pull, list, delete models with async support.",
+    "summary": "Official Python SDK: sync/async clients, streaming, chat & embed endpoints; auto-pulls missing models.",
     "source": "github",
-    "date": "2024-05-08",
+    "date": "2024-04-15",
     "highlights": [
-      "PyPI: ollama",
-      "async/await",
-      "streaming responses",
-      "type hints"
+      "pip install ollama",
+      "asyncio support",
+      "embeddings endpoint",
+      "100 % OpenAPI coverage"
     ]
   },
   {
     "title": "ollama-js",
     "url": "https://github.com/ollama/ollama-js",
-    "summary": "Official JavaScript/TypeScript client for Ollama; works in Node, Bun, Deno and browsers (via proxy).",
+    "summary": "Official JavaScript/TypeScript client for Node & browsers; promises & streams, types included.",
     "source": "github",
-    "date": "2024-05-07",
+    "date": "2024-04-14",
     "highlights": [
-      "npm: ollama",
-      "ESM & CommonJS",
-      "typed",
-      "streaming"
+      "npm i ollama",
+      "TypeScript defs",
+      "browser-compatible",
+      "streaming chat"
     ]
   },
   {
     "title": "langchain-ollama",
-    "url": "https://github.com/langchain-ai/langchain/tree/master/libs/partners/ollama",
-    "summary": "LangChain integration to use Ollama models for chat, completion, embeddings and tool-calling.",
+    "url": "https://github.com/langchain-ai/langchain/tree/master/libs/ollama",
+    "summary": "LangChain integration: chat, embed, tool-calling, structured output via Ollama local endpoints.",
     "source": "github",
-    "date": "2024-05-09",
+    "date": "2024-04-17",
     "highlights": [
-      "pip: langchain-ollama",
+      "pip install langchain-ollama",
       "tool use",
-      "RAG support",
-      "embeddings"
+      "JSON mode",
+      "RAG helpers"
     ]
   },
   {
     "title": "ollama-webui",
     "url": "https://github.com/ollama-webui/ollama-webui",
-    "summary": "Feature-rich web UI for Ollama (chat, model management, multi-user, dark mode, mobile friendly).",
+    "summary": "Feature-rich web UI (chat, multi-user, RAG, file upload, dark mode); drop-in replacement for ChatGPT-UI.",
     "source": "github",
-    "date": "2024-05-06",
+    "date": "2024-04-16",
     "highlights": [
-      "Docker image",
-      "OpenAI-compatible API",
-      "RAG uploads",
-      "voice input"
+      "Docker one-liner",
+      "OpenAI-compat endpoints",
+      "PDF/TXT RAG",
+      "role-based auth"
     ]
   },
   {
     "title": "ollama4j",
     "url": "https://github.com/amithkoujalgi/ollama4j",
-    "summary": "Java/Kotlin client for Ollama with fluent builder API, streaming, and Android compatibility.",
+    "summary": "Java/JVM client for Ollama (Spring Boot starters included); sync/async, streaming, Kotlin extensions.",
     "source": "github",
-    "date": "2024-05-05",
+    "date": "2024-04-10",
     "highlights": [
       "Maven Central",
-      "async",
-      "Android tested",
-      "Kotlin DSL"
-    ]
-  },
-  {
-    "title": "ollama-rb",
-    "url": "https://github.com/ollama/ollama-rb",
-    "summary": "Community-maintained Ruby gem for chatting and generating with local Ollama models.",
-    "source": "github",
-    "date": "2024-05-04",
-    "highlights": [
-      "RubyGems: ollama",
-      "streaming",
-      "Faraday backend"
+      "Spring Boot starter",
+      "Kotlin coroutines",
+      "model management"
     ]
   },
   {
     "title": "ollama-cli",
-    "url": "https://github.com/sugarforever/ollama-cli",
-    "summary": "Interactive CLI wrapper with conversation history, syntax highlighting and prompt templates.",
+    "url": "https://github.com/saltyorg/ollama-cli",
+    "summary": "Rust-based TUI for browsing, pulling and chatting with local models; fuzzy finder, keybindings.",
     "source": "github",
-    "date": "2024-05-03",
+    "date": "2024-04-08",
     "highlights": [
-      "prompt templates",
-      "conversation memory",
-      "pip install ollama-cli"
+      "cross-platform binary",
+      "vim keys",
+      "offline chat logs",
+      "model tagging"
     ]
   },
   {
     "title": "ollama-copilot",
-    "url": "https://github.com/ollama/ollama-copilot",
-    "summary": "VS Code extension bringing local Ollama models as GitHub-Copilot-style inline suggestions.",
+    "url": "https://github.com/ollama-copilot/ollama-copilot",
+    "summary": "VS Code extension that turns Ollama models into inline Copilot (FIM completions, custom prompts).",
     "source": "github",
-    "date": "2024-05-02",
+    "date": "2024-04-12",
     "highlights": [
-      "inline completions",
-      "configurable model",
-      "status-bar toggle"
+      "inline suggestions",
+      "FIM template support",
+      "configurable shortcuts",
+      "multi-model"
+    ]
+  },
+  {
+    "title": "ollama-haystack",
+    "url": "https://github.com/deepset-ai/haystack-integrations/tree/main/integrations/ollama",
+    "summary": "Haystack integration: generator, embedder and chat components for building local LLM pipelines.",
+    "source": "github",
+    "date": "2024-04-13",
+    "highlights": [
+      "pip install haystack-ai[ollama]",
+      "RAG pipelines",
+      "embedders",
+      "HuggingFace-compat"
+    ]
+  },
+  {
+    "title": "ollama-csharp",
+    "url": "https://github.com/ollama-ai/ollama-csharp",
+    "summary": "Community-maintained C#/.NET client with async streams, dependency injection helpers, and Blazor sample.",
+    "source": "github",
+    "date": "2024-04-11",
+    "highlights": [
+      "NuGet OllamaAi",
+      "System.Text.Json",
+      "DI extensions",
+      "Blazor chat demo"
     ]
   },
   {
     "title": "ollama-helm",
     "url": "https://github.com/otwld/ollama-helm",
-    "summary": "Production-ready Helm chart for deploying Ollama on Kubernetes with GPU and PVC support.",
+    "summary": "Production-ready Helm chart for Kubernetes: GPU node selector, PVC, autoscaling, ingress.",
     "source": "github",
-    "date": "2024-05-01",
+    "date": "2024-04-09",
     "highlights": [
-      "GPU node-selector",
-      "persistent storage",
-      "autoscaling"
+      "Helm repo",
+      "GPU tolerations",
+      "HPA",
+      "configmaps for models"
     ]
   },
   {
-    "title": "ollama-docker",
-    "url": "https://github.com/ollama/ollama/tree/main/docker",
-    "summary": "Official container images (CPU & GPU) and docker-compose examples for Ollama.",
+    "title": "ollama-rag",
+    "url": "https://github.com/ggerganov/ollama-rag",
+    "summary": "Minimal RAG example using Ollama + llama-index + Chroma; ingests PDFs and answers questions offline.",
     "source": "github",
-    "date": "2024-04-30",
+    "date": "2024-04-07",
     "highlights": [
-      "official image",
-      "CUDA/ROCm",
-      "docker-compose"
+      "llama-index",
+      "ChromaDB",
+      "offline embeddings",
+      "Gradio UI"
     ]
   },
   {
-    "title": "ollama-haystack",
-    "url": "https://github.com/ollama/haystack-ollama",
-    "summary": "Haystack integration by Ollama team: generators, chat and embeddings components.",
+    "title": "ollama-discord-bot",
+    "url": "https://github.com/rizerphe/ollama-discord-bot",
+    "summary": "Self-host Discord bot that chats, generates images (via SD) and remembers context per channel.",
     "source": "github",
-    "date": "2024-04-29",
+    "date": "2024-04-06",
     "highlights": [
-      "pip: ollama-haystack",
-      "RAG pipelines",
-      "embeddings"
-    ]
-  },
-  {
-    "title": "ollama-express",
-    "url": "https://github.com/ollama/ollama-express",
-    "summary": "Express.js starter that exposes an OpenAI-compatible REST endpoint backed by Ollama.",
-    "source": "github",
-    "date": "2024-04-28",
-    "highlights": [
-      "OpenAI drop-in",
-      "/v1/chat/completions",
-      "Dockerfile"
-    ]
-  },
-  {
-    "title": "ollama-rust",
-    "url": "https://github.com/ollama/ollama-rust",
-    "summary": "Community Rust crate providing async/sync clients for the Ollama HTTP API.",
-    "source": "github",
-    "date": "2024-04-27",
-    "highlights": [
-      "crates.io: ollama-rs",
-      "tokio",
-      "streaming"
-    ]
-  },
-  {
-    "title": "ollama-streamlit",
-    "url": "https://github.com/suyash/ollama-streamlit",
-    "summary": "Minimal Streamlit chat UI that talks to Ollama with session memory and markdown rendering.",
-    "source": "github",
-    "date": "2024-04-26",
-    "highlights": [
-      "pip install streamlit-ollama",
-      "session state",
+      "slash commands",
+      "context memory",
+      "Stable Diffusion bridge",
       "Docker"
     ]
   },
   {
-    "title": "ollama-n8n-node",
-    "url": "https://github.com/n8n-io/n8n/tree/master/packages/nodes-base/nodes/Ollama",
-    "summary": "n8n community node to integrate Ollama models into no-code workflows.",
-    "source": "github",
-    "date": "2024-04-25",
-    "highlights": [
-      "n8n node",
-      "workflow automation",
-      "credentials"
-    ]
-  },
-  {
     "title": "ollama-go",
-    "url": "https://github.com/ollama/ollama-go",
-    "summary": "Official Go client library for Ollama with generate/chat/embed helpers.",
+    "url": "https://github.com/ollama-ai/ollama-go",
+    "summary": "Community Go client with context cancellations, SSE streaming, and generics-based helpers.",
     "source": "github",
-    "date": "2024-04-24",
+    "date": "2024-04-05",
     "highlights": [
-      "pkg.go.dev",
-      "streaming",
-      "context cancellation"
+      "go get github.com/ollama-ai/ollama-go",
+      "context aware",
+      "SSE",
+      "generics"
     ]
   },
   {
-    "title": "ollama-csharp",
-    "url": "https://github.com/ollama/ollama-csharp",
-    "summary": "Community C# / .NET SDK for Ollama with async enumerable streaming support.",
+    "title": "ollama-nix",
+    "url": "https://github.com/NixOS/nixpkgs/pull/293847",
+    "summary": "Nix flake packaging Ollama binaries and CUDA drivers; enables reproducible local deployments.",
     "source": "github",
-    "date": "2024-04-23",
+    "date": "2024-04-04",
     "highlights": [
-      "NuGet: Ollama",
-      ".NET 6+",
-      "IAsyncEnumerable"
+      "nix flake",
+      "CUDA support",
+      "reproducible",
+      "systemd service"
     ]
   },
   {
-    "title": "ollama-django",
-    "url": "https://github.com/skorokithakis/ollama-django",
-    "summary": "Django app providing an OpenAI-compatible REST API proxy over Ollama for local LLMs.",
+    "title": "ollama-docker-compose",
+    "url": "https://github.com/ollama/ollama/tree/main/docker-compose",
+    "summary": "Official compose stacks: CPU-only, NVIDIA, AMD ROCm, and Open-WebUI combo ready to clone & run.",
     "source": "github",
-    "date": "2024-04-22",
+    "date": "2024-04-03",
     "highlights": [
-      "pip: django-ollama",
-      "admin UI",
-      "OpenAI compatibility"
+      "one-liner GPU",
+      "AMD ROCm",
+      "Open-WebUI bundled",
+      "volume caching"
     ]
   },
   {
-    "title": "ollama-models",
+    "title": "ollama-model-library",
     "url": "https://github.com/ollama/ollama/tree/main/models",
-    "summary": "Official registry of Modelfile definitions for Llama-3, Phi-3, Mistral, CodeLlama, etc.",
+    "summary": "Curated Modelfiles for Llama 3, Phi-3, CodeGemma, etc.; includes quantization and system prompts.",
     "source": "github",
-    "date": "2024-04-21",
+    "date": "2024-04-02",
     "highlights": [
-      "Modelfile examples",
-      "quantized sizes",
-      "community submissions"
+      "ready-to-use Modelfiles",
+      "quantized GGUF",
+      "system prompts",
+      "community PRs"
+    ]
+  },
+  {
+    "title": "ollama-rust",
+    "url": "https://github.com/ollama-ai/ollama-rust",
+    "summary": "Rust crate wrapping Ollama REST API with Tokio streams and serde types; published on crates.io.",
+    "source": "github",
+    "date": "2024-04-01",
+    "highlights": [
+      "crates.io/ollama",
+      "Tokio streams",
+      "serde",
+      "examples"
+    ]
+  },
+  {
+    "title": "ollama-distroless",
+    "url": "https://github.com/chainguard-dev/ollama-distroless",
+    "summary": "Distroless + scratch container images for Ollama reducing attack surface and image size ~70 %.",
+    "source": "github",
+    "date": "2024-03-31",
+    "highlights": [
+      "distroless",
+      "scratch",
+      "CVE reduction",
+      "multi-arch"
+    ]
+  },
+  {
+    "title": "ollama-mistral-finetune",
+    "url": "https://github.com/ollama/ollama-mistral-finetune",
+    "summary": "Tutorial repo showing how to fine-tune Mistral-7B with LoRA and import the weights into Ollama.",
+    "source": "github",
+    "date": "2024-03-30",
+    "highlights": [
+      "LoRA adapter",
+      "Modelfile import",
+      "training script",
+      "GPU steps"
     ]
   }
 ]
