@@ -1,10 +1,10 @@
 ## 📊 Performance Report
 
 **Period**: Last 24 hours
-**Timestamp**: 2026-05-30T03:21:44.901Z
+**Timestamp**: 2026-06-28T03:43:16.371Z
 
 | Workflow | Runs | Success | Failed | Success Rate | Avg Duration |
 |----------|------|---------|--------|--------------|-------------|
-| Ingestion | 7 | 7 | 0 | 100.0% | 669s |
-| Morning Report | 2 | 0 | 2 | 0.0% | 0s |
+| Ingestion | 3 | 0 | 3 | 0.0% | 0s |
+| Morning Report | 0 | 0 | 0 | N/A | 0s |
 | Afternoon Report | 2 | 0 | 2 | 0.0% | 0s |
